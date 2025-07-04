@@ -1,0 +1,37 @@
+{
+  "dependencies": {
+    "@prisma/client": "^6.5.0",
+    "bcrypt": "^6.0.0",
+    "dotenv": "^16.5.0",
+    "express": "^5.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "pg": "^8.16.0",
+    "typescript": "^5.8.3",
+    "zod": "^3.25.55"
+  },
+  "name": "backend",
+  "version": "1.0.0",
+  "main": "app.js",
+  "scripts": {
+    "dev": "ts-node-dev --respawn --transpile-only src/app.ts",
+    "build": "tsc",
+    "start": "node dist/app.js",
+    "postinstall": "prisma generate"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "prisma": {
+  "schema": "../../packages/postgres-prisma/prisma/schema.prisma"
+},
+  "devDependencies": {
+    "@types/bcrypt": "^5.0.2",
+    "@types/express": "^5.0.3",
+    "@types/jsonwebtoken": "^9.0.9",
+    "@types/node": "^22.15.31",
+    "@types/pg": "^8.15.4",
+    "prisma": "^6.5.0",
+    "ts-node-dev": "^2.0.0"
+  }
+}

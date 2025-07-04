@@ -1,0 +1,77 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "./generated/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id       String           @id @default(uuid())
+  username String           @unique
+  password String
+  email    String           @unique
+  cryptos  CryptoBalance[]
+  accounts AccountBalance[]
+}
+
+model CryptoBalance {
+  id        String          @id @default(uuid())
+  asset     String
+  quantity  Int
+  user      User            @relation(fields: [userId], references: [id])
+  userId    String
+  account   AccountBalance? @relation(fields: [accountId], references: [id])
+  accountId String?
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+}
+
+model AccountBalance {
+  id     String          @id @default(uuid())
+  amount Decimal         @db.Decimal(18, 8)
+  crypto CryptoBalance[]
+  user   User            @relation(fields: [userId], references: [id])
+  userId String          @unique
+}
+
+model Orders {
+  id        String   @id @default(cuid())
+  userId    String
+  market    String // TATA
+  side      String   @default("buy")
+  price     Decimal
+  quantity  Decimal
+  filled    Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@index([userId, filled]) // indexing for fast query
+}
+
+// model CryptoTransaction {
+//   id        String   @id @default(uuid())
+//   userId    String
+//   crypto    String
+//   quantity  Float
+//   side      String   // "buy" or "sell"
+//   timestamp DateTime @default(now())
+
+//   user      User     @relation(fields: [userId], references: [id])
+// }
+
+// model FiatDeposit {
+//   id        String   @id @default(uuid())
+//   userId    String
+//   amount    Float
+//   createdAt DateTime @default(now())
+
+//   user      User     @relation(fields: [userId], references: [id])
+// }
