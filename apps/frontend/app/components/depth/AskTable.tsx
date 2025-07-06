@@ -15,7 +15,7 @@ export const AskTable = ({ asks }: { asks: Array<{ price: string; quantity: stri
     asksWithTotal.reverse();
 
     return (
-        <div>
+        <div className="h-[40%] overflow-scroll">
             {asksWithTotal.map(({ price, quantity, total }) => (
                 <Ask 
                     maxTotal={maxTotal} 
@@ -43,6 +43,8 @@ function Ask({ price, quantity, total, maxTotal }: {
             width: "100%",
             backgroundColor: "transparent",
             overflow: "hidden",
+    
+            marginBottom:"2px"
         }}>
             <div style={{
                 position: "absolute",
@@ -54,7 +56,7 @@ function Ask({ price, quantity, total, maxTotal }: {
                 
                 transition: "width 0.3s ease-in-out",
             }}></div>
-            <div className="flex justify-between text-xs w-full">
+            <div className="flex justify-between text-xs w-full p-1">
                 <div>{String(price)}</div>
                 <div>{String(quantity)}</div>
                 

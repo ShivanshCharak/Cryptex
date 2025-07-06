@@ -17,6 +17,7 @@ async function main(){
     console.log("connected to redis")
     while(true){
         const response = await redisClient.rPop("db_processor" as string)
+        
         if(!response){
 
         }else{

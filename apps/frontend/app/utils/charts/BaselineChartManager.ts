@@ -12,6 +12,7 @@ export class BaselineChartManager extends BaseChartManager<"Baseline"> {
       bottomFillColor1: 'rgba( 239, 83, 80, 0.05)',
       bottomFillColor2: 'rgba( 239, 83, 80, 0.28)',
       lineWidth: 2,
+    
     });
   }
 }

@@ -44,7 +44,7 @@ function generateHourData(hourStart: Date) {
 
 async function seedData() {
   await client.connect();
-  await client.query(`DELETE FROM tata_prices`);
+  await client.query(`DELETE FROM sol_prices`);
 
   const allData: { time: string; price: number; volume: number; currency_code: string }[] = [];
 
@@ -57,7 +57,7 @@ async function seedData() {
 
     const hourData = generateHourData(hour).map(d => ({
       ...d,
-      currency_code: "TATA",
+      currency_code: "SOL",
     }));
 
     allData.push(...hourData);
@@ -66,7 +66,7 @@ async function seedData() {
   const placeholders = allData.map((_, i) => `($${i * 4 + 1}, $${i * 4 + 2}, $${i * 4 + 3}, $${i * 4 + 4})`).join(", ");
   const values = allData.flatMap(d => [d.time, d.price, d.volume, d.currency_code]);
 
-  await client.query(`INSERT INTO tata_prices (time, price, volume, currency_code) VALUES ${placeholders}`, values);
+  await client.query(`INSERT INTO SOL_prices (time, price, volume, currency_code) VALUES ${placeholders}`, values);
 
   await client.query(`REFRESH MATERIALIZED VIEW klines_1m`);
   await client.query(`REFRESH MATERIALIZED VIEW klines_1h`);

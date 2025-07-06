@@ -27,13 +27,13 @@ export interface Depth {
 }
 
 export interface Ticker {
-    "firstPrice": String,
-    "high": String,
-    "lastPrice": String,
-    "low": String,
+    "firstPrice": number,
+    "high": number,
+    "lastPrice": number,
+    "low": number,
     "change": String,
     "symbol": string,
-    "volume": String
+    "volume": number
 }
 
 export type TDepthBids={

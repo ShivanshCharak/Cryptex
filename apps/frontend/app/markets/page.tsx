@@ -13,6 +13,7 @@ import {
     NewAndTrending,
     Community_Votes
 } from "../utils/SVGPool"
+import MarketNews from "../components/MarketNews"
 
 export default function Market() {
     const cardConfigs = [
@@ -31,7 +32,7 @@ export default function Market() {
     return (
         <div>
 
-        <div className="flex">
+        <div className="flex w-full justify-around">
             
         <div className="flex max-w-full">
                 {cardConfigs.map((config, index) => (
@@ -41,10 +42,9 @@ export default function Market() {
                     data={config.data}
                     symbols={config.symbols}
                     />
-                ))}
-
-        </div>
+                ))}</div>
         <MarketAltCard/>
+        <MarketNews/>
         </div>
         <CategoryMarket/>
         <CryptoTable

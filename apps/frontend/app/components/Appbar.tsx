@@ -12,6 +12,7 @@ import { usePathname } from "next/navigation";
 import Link from 'next/link';
 import { useState } from "react";
 import Image from "next/image";
+
 import { PrimaryButton, SuccessButton } from "./core/Button"
 import { useRouter } from "next/navigation";
 import { Burger, Search, Tag } from "../utils/SVGPool";
@@ -45,31 +46,38 @@ export const Appbar = () => {
   const [showCommunity,setShowCommunity] = useState(false)
   const [showProducts,setShowProducts] = useState(false)
   const [showAuth,setShowAuth] = useState(false)
+  const [showMarkets,setShowMarkets] = useState(false)
   const {user} = useUserAuth()
+  
 
 
 
-  return <div className="text-white border-b border-slate-800 py-3">
+  return <div className="text-white border-b border-slate-800 py-3 z-10 ">
         <div className="flex justify-between items-center p-2">
             <span className="flex">
                 <span className={`text-xl pl-4 flex flex-col justify-center cursor-pointer text-white`} onClick={() => router.push('/')}>
                     Exchange
                 </span>
-                <span className={`text-sm pt-1 flex flex-col justify-center pl-8 cursor-pointer ${route.startsWith('/markets') ? 'text-white' : 'text-slate-500'}`} onClick={() => router.push('/markets')}>
+                <span className={`text-sm pt-1 flex flex-col justify-center pl-8 cursor-pointer hover:text-white ${route.startsWith('/markets') ? 'text-white' : 'text-slate-500'}`} onClick={() => router.push('/markets')}>
                     Markets
                 </span>
-                <span className={`text-sm pt-1 flex flex-col justify-center pl-8 cursor-pointer ${route.startsWith('/trade') ? 'text-white' : 'text-slate-500'}`} onClick={() => router.push('/trade/SOL_USDC')}>
+                <span className={`text-sm pt-1 flex flex-col justify-center pl-8 cursor-pointer hover:text-white ${route.startsWith('/trade') ? 'text-white' : 'text-slate-500'}`} onClick={() => router.push('/trade/SOL_USDC')}>
                     Trade
                 </span>
-                <span  onMouseOver={()=>setShowDexScan(true)} onMouseLeave={()=>setShowDexScan(false)} className={` font-semibold hover:text-white relative text-sm pt-1 flex flex-col justify-center pl-8 cursor-pointer ${route.startsWith('/trade') ? 'text-white' : 'text-slate-500'}`} onClick={() => router.push('/trade/SOL_USDC')}>
+                <span  onMouseOver={()=>setShowDexScan(true)} onMouseLeave={()=>setShowDexScan(false)} className={` font-semibold hover:text-white relative text-sm pt-1 flex flex-col justify-center pl-8 cursor-pointer text-slate-500  `} onClick={() => router.push('/trade/SOL_USDC')}>
                     DexScan
+                    <div className="absolute left-0 top-full z-50 w-screen px-10">
+      {/* <ProductsDropdown /> */}
 <MegaMenu showDexScan={showDexScan}/>
+    </div>
                 </span>
-                <span onMouseOver={()=>setShowCommunity(true)} onMouseLeave={()=>setShowCommunity(false)} className={` relative text-sm pt-1 flex flex-col justify-center pl-8 cursor-pointer ${route.startsWith('/trade') ? 'text-white' : 'text-slate-500'}`} onClick={() => router.push('/trade/SOL_USDC')}>
+                <span onMouseOver={()=>setShowCommunity(true)} onMouseLeave={()=>setShowCommunity(false)} className={` hover:text-white relative text-sm pt-1 flex flex-col justify-center pl-8 cursor-pointer text-slate-500 font-semibold`}>
                     Community
+                    <div className="absolute left-0 top-full z-50 w-screen px-10">
                     <FeedsDropdown showCommunity={showCommunity}/>
+    </div>
                 </span>
-                <span onMouseOver={()=>setShowProducts(true)} onMouseLeave={()=>setShowProducts(false)} className={`relative text-sm pt-1 flex flex-col justify-center pl-8 cursor-pointer ${route.startsWith('/trade') ? 'text-white' : 'text-slate-500'}`} onClick={() => router.push('/trade/SOL_USDC')}>
+                <span onMouseOver={()=>setShowProducts(true)} onMouseLeave={()=>setShowProducts(false)} className={`hover:text-white relative text-sm pt-1 flex flex-col justify-center pl-8 cursor-pointer text-slate-500 font-semibold `}>
                     Products
                     {showProducts && (
                       <div className="absolute left-0 top-full z-50 w-screen px-10">
@@ -77,7 +85,7 @@ export const Appbar = () => {
     </div>
   )}
                 </span>
-                <span className={`text-sm pt-1 flex flex-col justify-center pl-8 cursor-pointer ${route.startsWith('/trade') ? 'text-white' : 'text-slate-500'}`} onClick={() => router.push('/trade/SOL_USDC')}>
+                <span className={`text-sm pt-1 flex flex-col justify-center pl-8 cursor-pointer hover:text-white text-slate-500 fonts-semibold`}>
                     CMC Launch
                 </span>
             </span>
@@ -88,14 +96,27 @@ export const Appbar = () => {
                 <span className=" text-sm pt-1 flex justify-between items-center w-[101px] pl-8 cursor-pointer text-slate-500">
                     <Watchlist /> Watchlist
                 </span>
-                <span className="flex items-center bg-[#323546] p-2 rounded-lg">
-                    <Search /> <input type="text" className="bg-inherit text-sm outline-none ml-4" placeholder=" Search" />
+                <span className="flex flex-col items-center rounded-lg relative">
+                 
+                 <span className='flex bg-[#323546] p-2 rounded'>
+
+                    <Search /> <input type="text" className=" bg-inherit text-sm outline-none ml-4" placeholder=" Search" onFocus={()=> setShowMarkets(true)} onBlur={()=>setShowMarkets(false)} />
+                 </span>
+                 {showMarkets?<>
+                    <ul className='w-full mt-10 absolute bg-[#323546] p-2 rounded cursor-pointer duration-500'>
+                      <li className='text-xs hover:bg-gray-400 p-2  duration-300 rounded' onClick={()=>route.startsWith('/markets')?router.push('/trade/SOL_USDC'):""}>SOL/USDC</li>
+                      <span className='text-slate-500 text-xs'>For now only SOL market is available</span>
+                    </ul>
+                 
+                 </>:<></>}
+
+
 
                 </span>
                 <span className="cursor-pointer w-[35px] h-[35px] flex justify-center items-center bg-[#323546] rounded-md">
                     <Tag />
                 </span>
-                {user?.user.email?<><Link href={"/deposit"}><SuccessButton>Deposit</SuccessButton></Link></>:
+                {user?.email?<><Link href={"/deposit"}><SuccessButton>Deposit</SuccessButton></Link></>:
                 <button onClick={()=>{
                   setShowAuth((prev)=>!prev)         
                 }} className=" text-sm font-semibold bg-blue-800 w-[80px] h-[35px] flex justify-center items-center rounded-md">
@@ -112,12 +133,6 @@ export const Appbar = () => {
                     )}
                 </span>
             </div>
-            {/* <span className="flex">
-                <span className="p-2 mr-2">
-                <SuccessButton>Deposit</SuccessButton>
-                <PrimaryButton>Withdraw</PrimaryButton>
-                </span>
-                </span> */}
         </div>
     </div>
 
@@ -223,11 +238,12 @@ function ProductsDropdown() {
 }
 function ProfileDropDown(){
     const {user} = useUserAuth()
+    {console.log("username",user?.user)}
   return(<>
     <div className="z-[200] duration-200  absolute top-10 right-5 w-80 bg-[#1e1e2f] text-white rounded-xl p-4 space-y-4 font-sans">
   <div className="flex justify-between items-center">
-    {user?.username?
-      <span>{user?.id.substring(0,20)}....</span>:
+    {user?.token?
+      <span className='text-xs '>{user?.user.email}....</span>:
 <>
       <button className="border border-blue-600 text-blue-500 px-4 py-1.5 rounded-md text-sm font-medium">Sign Up</button>
       <button className="bg-blue-600 text-white px-4 py-1.5 rounded-md text-sm font-medium">Log In</button>

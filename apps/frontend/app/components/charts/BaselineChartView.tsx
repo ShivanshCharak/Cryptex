@@ -23,6 +23,7 @@ export function BaselineChartView({
   range: "1D" | "1W" | "1M" | "1Y";
 }) {
   const chartRef = useRef<HTMLDivElement>(null);
+  const tooltipRef = useRef<HTMLDivElement>(null); // ✅ Tooltip ref
   const chartManagerRef = useRef<BaselineChartManager | null>(null);
 
   useEffect(() => {
@@ -32,6 +33,7 @@ export function BaselineChartView({
         const to = Math.floor(Date.now() / 1000);
         const from = Math.floor(getStartTimestamp(range) / 1000);
         klineData = await getKlines(market, "1h", from, to);
+        console.log(klineData)
       } catch (error) {
         console.error("Error fetching baseline chart data", error);
       }
@@ -41,12 +43,12 @@ export function BaselineChartView({
         time: Math.floor(new Date(x.end).getTime() / 1000) as UTCTimestamp,
       }));
 
-      if (chartRef.current) {
+      if (chartRef.current && tooltipRef.current) {
         chartManagerRef.current?.destroy();
         chartManagerRef.current = new BaselineChartManager(chartRef.current, {
           background: "#0e0f14",
           color: "white",
-        });
+        }, undefined, tooltipRef.current); // ✅ Pass tooltip
         chartManagerRef.current.setData(baselineData);
       }
     };
@@ -54,5 +56,26 @@ export function BaselineChartView({
     fetchData();
   }, [market, range]);
 
-  return <div className="baselinechart" ref={chartRef} style={{ height: "80%", width: "100%" }} />;
+  return (
+    <div style={{ position: "relative", height: "70%", width: "100%" }}>
+      <div className="baselinechart" ref={chartRef} style={{ height: "100%", width: "100%" }} />
+      <div
+        ref={tooltipRef}
+        style={{
+          position: "absolute",
+          display: "none",
+          backgroundColor: "#1e1e2f",
+          padding: "10px 14px",
+          borderRadius: "8px",
+          boxShadow: "0 2px 8px rgba(0,0,0,0.3)",
+          color: "white",
+          fontSize: "12px",
+          zIndex: 1000,
+          pointerEvents: "none",
+          whiteSpace: "nowrap",
+          minWidth: "200px",
+        }}
+      />
+    </div>
+  );
 }

@@ -22,7 +22,7 @@ services:
     image: postgres
     container_name: postgresdb
     ports: 
-      - "8080:8080"
+      - "5433:5432"
     environment:
       POSTGRES_DB: users
       POSTGRES_USER: shivansh

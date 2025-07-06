@@ -13,27 +13,30 @@ export default function RangeSwitcherBar({
   onRangeChange: (range: string) => void;
   setChartType:(chartType:string)=>void
   chartType:String
-}) {
+}) 
+{
+  const [showMagnified, setShowMagnified] = useState(false)
   return (
     <div className="flex items-center justify-between px-4 py-2 bg-[#0e0f14] text-white rounded-md space-x-2 overflow-x-auto max-w-[90%]">
       {/* Left Group */}
-      <div className="flex space-x-2 items-center bg-[#323546] py-1 px-2 border rounded-md border-transparent">
-        <button className="px-3 py-1 rounded bg-[#1b1e29] text-white font-medium text-[14px]">Price</button>
-        <button className="px-3 py-1 rounded hover:bg-[#1b1e29] text-[14px]">Market cap</button>
+      <div className="flex space-x-2 items-center  py-1 px-2 border rounded-md border-transparent">
+        <button className="px-3 py-1 rounded  text-white hover:bg-[#1b1e29] font-medium text-xs">Price</button>
+        <button className="px-3 py-1 rounded hover:bg-[#1b1e29] text-xs">Market cap</button>
       </div>
       
-      <div className="bg-[#323546] py-1 px-2 border rounded-md border-transparent w-[100px] justify-between flex">
-        <button onClick={()=>setChartType("barchart")} className={`p-2 rounded hover:bg-[#1b1e29] ${chartType==="barchart"?"bg-[#222531]":""}`}>
+      <div className=" py-1 px-2 border rounded-md border-transparent w-[100px] justify-between flex">
+        <button onClick={()=>setChartType("barchart")} className={`p-2 rounded hover:bg-zinc-700 ${chartType==="barchart"?"bg-zinc-700":""}`}>
           <BarChart/>
           </button>
-        <button onClick={()=>setChartType("linechart")}  className={`p-2 rounded hover:bg-[#1b1e29] ${chartType==="linechart"?"bg-[#222531]":""}`}>
+        <button onClick={()=>setChartType("linechart")}  className={`p-2 rounded hover:bg-zinc-700 ${chartType==="linechart"?"bg-zinc-700":""}`}>
           <LineChart/>
         </button>
       </div>
 
       {/* Center Group */}
       <div className="flex space-x-2 items-center">
-        <button className="px-3 py-1 rounded hover:bg-[#1b1e29] text-sm border border-[#2a2d3a]">TradingView</button>
+        <button className="px-3 py-1 rounded hover:bg-[#1b1e29] text-sm border border-[#2a2d3a]" onClick={()=> setShowMagnified(true)}>TradingView</button>
+        <div className="absolutr"></div>
         <select className="bg-[#1b1e29] text-white text-sm px-2 py-1 rounded outline-none">
           <option>Compare with</option>
           <option>BTC</option>

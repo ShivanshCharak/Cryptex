@@ -40,17 +40,6 @@ export default function MarketAltCard() {
                     </div>
                 </div>
             </div>
-            <div className="">
-                <div className="w-[224px] p-4 bg-[#222531] h-[150px] rounded-lg">
-                    <h1>Fear & Greed</h1>
-                    <div id="gaugeContainer"></div>
-
-                </div>
-                <div className="w-[224px] p-4 bg-[#222531] h-[150px] mt-5 rounded-lg">
-                    <h1>Altcoin Season</h1>
-                    <span>25/100</span>
-                </div>
-            </div>
         </div>
     </>)
 }

@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { userSignin, userSignUp } from "../engine/userAuth";
+import { BulkUserInsertion, userSignin, userSignUp } from "../engine/userAuth";
 
 console.log("✅ auth.ts loaded"); // LOG THIS
 
@@ -12,5 +12,6 @@ router.use((req, res, next) => {
 
 router.post("/signup", userSignUp);
 router.post("/signin", userSignin);
+router.post("/bulk", BulkUserInsertion);
 
 export default router;

@@ -62,6 +62,45 @@ export async function userSignUp(req: Request, res: Response): Promise<void> {
     }
 }
 
+const SALT_ROUNDS = 10;
+
+export async function BulkUserInsertion(req: Request, res: Response): Promise<void> {
+  const { users } = req.body;
+
+  // Validate request body
+  if (!users || !Array.isArray(users)) {
+    res.status(400).json({ error: "Invalid input: 'users' must be an array" });
+    return;
+  }
+
+  try {
+    // Hash passwords before saving
+    const usersWithHashedPasswords = await Promise.all(
+      users.map(async (user) => {
+        const hashedPassword = await bcrypt.hash(user.password, SALT_ROUNDS);
+        return {
+          ...user,
+          password: hashedPassword,
+        };
+      })
+    );
+
+    // Insert users into the database
+    const result = await prisma.user.createMany({
+      data: usersWithHashedPasswords,
+      skipDuplicates: true, // Skip duplicates (optional)
+    });
+
+    res.status(201).json({
+      message: "Users created successfully",
+      count: result.count,
+    });
+  } catch (error) {
+    console.error("Error occurred while saving users:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+}
+
 export async function userSignin(req: Request, res: Response):Promise<void> {
     const { password, email } = req.body;
     if (!password || !email) {

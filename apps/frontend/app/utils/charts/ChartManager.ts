@@ -58,6 +58,10 @@ export class ChartManager {
     });
 
     this.chart = chart;
+    chart.timeScale().setVisibleLogicalRange({
+      from:100,
+      to:150
+    })
     
     const transformedData = initialData.map((data) => ({
       ...data,
@@ -81,7 +85,6 @@ export class ChartManager {
   }
   
 
-
   public update(updatedPrice: any) {
     if (!this.lastUpdateTime) {
       this.lastUpdateTime = new Date().getTime();
@@ -94,6 +97,7 @@ export class ChartManager {
       high: updatedPrice.high,
       open: updatedPrice.open,
     });
+
 
     if (updatedPrice.newCandleInitiated) {
       this.lastUpdateTime = updatedPrice.time;
@@ -108,6 +112,8 @@ export class ChartManager {
       },
     });
   }
+
+    
       // Subscribe to crosshair and show tooltip
       private subscribeToCrosshairMove(tooltipEl: HTMLDivElement) {
         console.log("1")
@@ -119,6 +125,7 @@ export class ChartManager {
           }
         
           const data = param.seriesData.values().next().value;
+          
           if (!data) return;
         
           const { open, high, low, close } = data;

@@ -6,7 +6,7 @@ import { tradesRouter } from "./routes/trades";
 import { klineRouter } from "./routes/kline";
 import { tickersRouter } from "./routes/ticker";
 
-const app = express();
+export const app = express();
 app.use(cors());
 app.use(express.json());
 

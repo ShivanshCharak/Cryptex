@@ -15,10 +15,11 @@ import {
     constructor(
       container: HTMLDivElement,
       layout: { background: string; color: string },
-      options?: Partial<ChartOptions>
+      options?: Partial<ChartOptions>,
+      tooltip:HTMLDivElement
     ) {
       this.container = container;
-  
+      
       this.chart = createChart(container, {
         autoSize: true,
         layout: {
@@ -36,12 +37,39 @@ import {
         },
         ...options,
       });
-  
+      
+      this.subscribeToCrossHairMove(tooltip)
       this.series = this.addSeries();
+      
     }
-  
     protected abstract addSeries(): ISeriesApi<T>;
-  
+
+    private subscribeToCrossHairMove(tooltip: HTMLDivElement) {
+      this.chart.subscribeCrosshairMove((param) => {
+        if (!tooltip || !param.time || param.seriesData.size === 0) {
+          tooltip.style.display = "none";
+          return;
+        }
+    
+        const data = param.seriesData.values().next().value;
+        if (!data) return;
+    
+        const timestamp = (param.time as UTCTimestamp) * 1000;
+        const date = new Date(timestamp);
+        const formattedDate = date.toLocaleDateString("en-US");
+        const formattedTime = date.toLocaleTimeString("en-US");
+    
+        tooltip.innerHTML = `
+          <div>${formattedDate} <span style="float:right">${formattedTime}</span></div>
+          <div>Price: <b>$${data.value.toFixed(2)}</b></div>
+        `;
+    
+        tooltip.style.display = "block";
+        tooltip.style.left = `${param.point?.x ?? 0 + 20}px`;
+        tooltip.style.top = `${param.point?.y ?? 0 - 100}px`;
+      });
+    }
+    
     public setData(data: { time: UTCTimestamp; value: number }[]) {
       const sorted = data.sort((a, b) => a.time - b.time);
       this.series.setData(sorted);

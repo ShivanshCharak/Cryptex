@@ -1,7 +1,10 @@
+"use client"
 import { useEffect, useRef } from "react";
 import { ChartManager } from "../../utils/charts/ChartManager";
 import { getKlines } from "../../utils/httpClient";
+import { useOrders } from "@/app/utils/context/DepthContext";
 import { KLine } from "../../utils/types";
+
 
 function getStartTimestamp(range: string): number {
   const now = Date.now();
@@ -24,16 +27,20 @@ export function TradeView({
   const chartRef = useRef<HTMLDivElement>(null);
   const chartManagerRef = useRef<ChartManager | null>(null);
 const tooltipRef = useRef<HTMLDivElement>(null);
+const {setKlines, klines} = useOrders()
 
 
-  useEffect(() => {
-    const init = async () => {
-      let klineData: KLine[] = [];
-      try {
-        const to = Math.floor(Date.now() / 1000);
-        const from = Math.floor(getStartTimestamp(range) / 1000);
-        klineData = await getKlines(market, "1h", from, to);
-        console.log("KlineData", klineData);
+useEffect(() => {
+  const init = async () => {
+    
+    let klineData: KLine[] = [];
+    try {
+      const to = Math.floor(Date.now() / 1000);
+      const from = Math.floor(getStartTimestamp(range) / 1000);
+      klineData = await getKlines(market, "1w", from, to);
+      setKlines(klineData[0])
+      
+
       } catch (e) {
         console.error("Failed to fetch klines", e);
       }
@@ -64,10 +71,10 @@ const tooltipRef = useRef<HTMLDivElement>(null);
     };
 
     init();
-  }, [market, range]);
+  }, []);
 
   return (
-    <div style={{ position: "relative", height: "80%", width: "100%" }}>
+    <div style={{ position: "relative", height: "70%", width: "100%" }}>
       <div
         ref={chartRef}
         className="tradechart"

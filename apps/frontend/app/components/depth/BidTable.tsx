@@ -16,7 +16,7 @@ export const BidTable = ({ bids }: { bids: Array<{ price: string; quantity: stri
     const maxTotal = relevantBids.reduce((acc, { quantity }) => acc + Number(quantity), 0);
 
     return (
-        <div>
+        <div className="h-[40%] overflow-scroll">
             {bidsWithTotal?.map(({ price, quantity, total }, index) => (
                 <Bid
                     maxTotal={maxTotal}
@@ -43,6 +43,7 @@ function Bid({ price, quantity, total, maxTotal }: {
             width: "100%",
             backgroundColor: "transparent",
             overflow: "hidden",
+            marginBottom:"2px"
         }}>
             <div style={{
                 position: "absolute",
@@ -54,7 +55,7 @@ function Bid({ price, quantity, total, maxTotal }: {
                 background: "rgba(1, 167, 129, 0.325)",
                 transition: "width 0.3s ease-in-out",
             }}></div>
-            <div className="flex justify-between text-xs w-full">
+            <div className="flex justify-between text-xs w-full p-1">
                 <div>{String(price)}</div>
                 <div>{String(quantity)}</div>
                 <div>{String(total.toFixed(2))}</div>
