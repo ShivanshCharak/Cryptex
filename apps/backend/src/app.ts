@@ -4,9 +4,10 @@ import dotenv from 'dotenv';
 import prisma from 'postgres-prisma'
 import cors from 'cors'
 import auth from './routes/authRouter';
-import moneyDeposit from './routes/moneyRouter'; // ← Correct
+import moneyDeposit from './routes/moneyRouter'; 
 import cryptoDeposit from './routes/cryptoRouter';
 import orderDeposit from './routes/orderRouter'
+import { authMiddleware } from './middleware/authMiddleware';
 
 dotenv.config();
 
@@ -22,13 +23,16 @@ prisma.$connect()
   
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(cors())
+app.use(cors({
+  origin:'http://localhost:3000',
+  credentials:true
+}))
 
 
 app.use("/auth", auth);
-app.use("/account", moneyDeposit); // ← attaches /account/deposit
-app.use("/crypto", cryptoDeposit);
-app.use("/order", orderDeposit);
+app.use("/account" ,authMiddleware ,moneyDeposit); // ← attaches /account/deposit
+app.use("/crypto",authMiddleware ,cryptoDeposit);
+app.use("/order",authMiddleware ,orderDeposit);
 
 
 process.on('SIGINT', async () => {

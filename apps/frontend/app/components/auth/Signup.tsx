@@ -5,12 +5,9 @@ import { IoMdClose } from "react-icons/io";
 import { useState } from "react";
 import {toast} from 'react-toastify'
 import {useUserAuth} from '../../utils/context/UserContext'
+import {TUserInfo} from '../../utils/types'
 
-type IuserInfo = {
-  email: string;
-  password: string;
-  username?:string
-};
+
 type Props = {
   setShowAuth: Dispatch<SetStateAction<boolean>>;
 };
@@ -18,7 +15,7 @@ type Props = {
 export default function Signup({setShowAuth}:Props) {
   const {setUser, user} = useUserAuth()
   const [showPassword, setShowPassword] = useState(false);
-  const [userData, setUserData] = useState<IuserInfo>({
+  const [userData, setUserData] = useState<TUserInfo>({
     email: "",
     password: "",
     username:""
@@ -28,8 +25,10 @@ export default function Signup({setShowAuth}:Props) {
   async function handleSubmit(){
 
     try {
-      const data  = await fetch("http://localhost:3003/auth/signin",{
+      console.log(`http://localhost:3003/auth/${authType}`)
+      const data  = await fetch(`http://localhost:3003/auth/${authType}`,{
         method:'POST',
+        credentials:'include',
         body:JSON.stringify(
           userData
         ),
@@ -48,7 +47,8 @@ export default function Signup({setShowAuth}:Props) {
       }
       
       
-      localStorage.setItem('token',fetched.token)
+      localStorage.setItem('token',fetched.accessToken)
+      
       setShowAuth(false)
       console.log(fetched)
       toast.success(fetched.message)
@@ -57,6 +57,11 @@ export default function Signup({setShowAuth}:Props) {
       console.log(error)
     }
   }
+  useEffect(()=>{
+    if(!localStorage.getItem('token')){
+      console.log("no token found")
+    }
+  },[localStorage.getItem('token')])
 
   const [authType,setAuthType] = useState('Login')
   useEffect(() => {

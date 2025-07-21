@@ -3,15 +3,13 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import prisma from "postgres-prisma";
 import { userLoginSchema, userSchema } from "../zodvalidator";
-import z from "zod";
+import dotenv from 'dotenv'
+dotenv.config()
 
-const ACCESS_TOKEN_SECRET="gamma";
-const REFRESH_TOKEN_SECRET ="delta";
+const SALT_ROUNDS = 10;
 
-// Interface, though unused here, can remain for future strict typing
-interface authParams {
-    username: string;
-    password: string;
+interface TokenPayload {
+    userId: string;
     email: string;
 }
 
@@ -26,11 +24,15 @@ export async function userSignUp(req: Request, res: Response): Promise<void> {
     const validation = userSchema.safeParse({ username, password, email });
 
     if (!validation.success) {
-        res.status(400).json({ error: "Validation failed", details: validation.error.errors });
+        res.status(400).json({ 
+            error: "Validation failed", 
+            details: validation.error.errors 
+        });
         return;
     }
 
     try {
+        
         const existingUser = await prisma.user.findUnique({
             where: { username },
         });
@@ -40,7 +42,17 @@ export async function userSignUp(req: Request, res: Response): Promise<void> {
             return;
         }
 
-        const hashedPassword = await bcrypt.hash(password, 10);
+        
+        const existingEmail = await prisma.user.findUnique({
+            where: { email },
+        });
+
+        if (existingEmail) {
+            res.status(409).json({ error: "Email already exists" });
+            return;
+        }
+
+        const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
 
         const user = await prisma.user.create({
             data: {
@@ -50,69 +62,66 @@ export async function userSignUp(req: Request, res: Response): Promise<void> {
             },
         });
 
-        res.json(user);
+        const tokenPayload: TokenPayload = {
+            userId: user.id,
+            email: user.email
+        };
+
+        
+        const accessToken = jwt.sign(tokenPayload, process.env.ACCESS_TOKEN_SECRET as string, { 
+            expiresIn: "15m" 
+        });
+        
+        const refreshToken = jwt.sign(tokenPayload, process.env.REFRESH_TOKEN_SECRET as string , { 
+            expiresIn: "7d" 
+        });
+
+        
+        res.cookie('refreshToken', refreshToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict',
+            maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+        });
+
+        res.status(201).json({
+            message: "User created successfully",
+            accessToken,
+            user: { 
+                id: user.id, 
+                email: user.email, 
+                username: user.username 
+            },
+        });
 
     } catch (error: any) {
         console.error("Signup error:", error);
         if (error.code === "P2002") {
-            res.status(409).json({ error: `Unique constraint failed on: ${error.meta?.target?.join(", ")}` });
+            res.status(409).json({ 
+                error: `Unique constraint failed on: ${error.meta?.target?.join(", ")}` 
+            });
         } else {
             res.status(500).json({ error: "Internal server error" });
         }
     }
 }
 
-const SALT_ROUNDS = 10;
-
-export async function BulkUserInsertion(req: Request, res: Response): Promise<void> {
-  const { users } = req.body;
-
-  // Validate request body
-  if (!users || !Array.isArray(users)) {
-    res.status(400).json({ error: "Invalid input: 'users' must be an array" });
-    return;
-  }
-
-  try {
-    // Hash passwords before saving
-    const usersWithHashedPasswords = await Promise.all(
-      users.map(async (user) => {
-        const hashedPassword = await bcrypt.hash(user.password, SALT_ROUNDS);
-        return {
-          ...user,
-          password: hashedPassword,
-        };
-      })
-    );
-
-    // Insert users into the database
-    const result = await prisma.user.createMany({
-      data: usersWithHashedPasswords,
-      skipDuplicates: true, // Skip duplicates (optional)
-    });
-
-    res.status(201).json({
-      message: "Users created successfully",
-      count: result.count,
-    });
-  } catch (error) {
-    console.error("Error occurred while saving users:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
-}
-
-export async function userSignin(req: Request, res: Response):Promise<void> {
+export async function userSignIn(req: Request, res: Response): Promise<void> {
     const { password, email } = req.body;
+    console.log(password,email)
     if (!password || !email) {
-        res.status(400).json({ error: "Email and password are required." });
-        return
+        res.status(400).json({ error: "Email and password are required" });
+        return;
     }
 
     const validation = userLoginSchema.safeParse({ password, email });
 
     if (!validation.success) {
-        res.status(400).json({ error: "Validation failed", details: validation.error.errors });
-        return
+        res.status(400).json({ 
+            error: "Validation failed", 
+            details: validation.error.errors 
+        });
+        return;
     }
 
     try {
@@ -121,26 +130,96 @@ export async function userSignin(req: Request, res: Response):Promise<void> {
         });
 
         if (!user) {
-            res.status(404).json({ error: "User not found." });
-            return
+            res.status(401).json({ error: "Invalid credentials" });
+            return;
         }
 
         const isValid = await bcrypt.compare(password, user.password);
         if (!isValid) {
-            res.status(401).json({ error: "Invalid credentials." });
-            return
+            res.status(401).json({ error: "Invalid credentials" });
+            return;
         }
+        const tokenPayload: TokenPayload = {
+            userId: user.id,
+            email: user.email
+        };
 
-        const token = jwt.sign({ userId: user.id, email }, "gamma", { expiresIn: "1h" });
+        
+        const accessToken = jwt.sign(tokenPayload, process.env.ACCESS_TOKEN_SECRET as string, { 
+            expiresIn: "15m" 
+        });
+        
+        const refreshToken = jwt.sign(tokenPayload, process.env.REFRESH_TOKEN_SECRET as string, { 
+            expiresIn: "7d" 
+        });
+
+        
+        res.cookie('refreshToken', refreshToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict',
+            maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+        });
 
         res.status(200).json({
-            token,
             message: `Welcome back ${user.username}`,
-            user: { id: user.id, email: user.email, username: user.username },
+            accessToken,
+            user: { 
+                id: user.id, 
+                email: user.email, 
+                username: user.username 
+            },
         });
 
     } catch (error) {
         console.error("Sign-in error:", error);
-        res.status(500).json({ error: "Internal server error." });
+        res.status(500).json({ error: "Internal server error" });
     }
+}
+
+export async function refreshToken(req: Request, res: Response): Promise<void> {
+    const { refreshToken } = req.cookies;
+
+    if (!refreshToken) {
+        res.status(401).json({ error: "Refresh token not found" });
+        return;
+    }
+
+    try {
+        const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET as string) as TokenPayload;
+        
+        
+        const user = await prisma.user.findUnique({
+            where: { id: decoded.userId },
+        });
+
+        if (!user) {
+            res.status(401).json({ error: "User not found" });
+            return;
+        }
+
+        const tokenPayload: TokenPayload = {
+            userId: user.id,
+            email: user.email
+        };
+
+        
+        const newAccessToken = jwt.sign(tokenPayload, process.env.ACCESS_TOKEN_SECRET as string, { 
+            expiresIn: "15m" 
+        });
+
+        res.status(200).json({
+            accessToken: newAccessToken,
+            message: "Token refreshed successfully"
+        });
+
+    } catch (error) {
+        console.error("Token refresh error:", error);
+        res.status(401).json({ error: "Invalid refresh token" });
+    }
+}
+
+export async function logout(req: Request, res: Response): Promise<void> {
+    res.clearCookie('refreshToken');
+    res.status(200).json({ message: "Logged out successfully" });
 }
