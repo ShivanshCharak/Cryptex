@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useAmount } from "../utils/context/AmountContext";
-import { useUserAuth } from "../utils/context/UserContext";
+import { useUserAuth } from "../utils/context/UserProvider";
 import { useOrders } from "../utils/context/DepthContext";
 import { TTradeInfo } from "./depth/type";
 

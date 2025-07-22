@@ -1,16 +1,19 @@
- export const cryptoAssets = [
+import { TCryptoAssets } from "./types";
+import { TDexScan } from "./types";
+ export const cryptoAssets:TCryptoAssets = [
         { name: "Bitcoin", symbol: "BTC", image: '/1.png', price: "$67,000" },
         { name: "Ethereum", symbol: "ETH", image: "/eth.png", price: "$3,100" },
         { name: "Binance", symbol: "BNB", image: '/binance.png', price: "$600" },
         { name: "Dogecoin", symbol: "DOGE", image: "/dogecoin.png", price: "$0.15" },
         { name: "BNB", symbol: "BNB", image: "/bnb.png", price: "$600" },
       ];
-      export const DexScan = [
+      export const DexScan:TDexScan = [
         {
           symbol: "SKYAI/USDT",
           price: "$0.06473",
           image:'/SkyAi.png',
-
+          changePercent:"+0.56%",
+          isPositive:true
         },
         {
           symbol: "TRUMP/USDC",

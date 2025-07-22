@@ -4,7 +4,13 @@ import {
   CrosshairMode,
   ISeriesApi,
   UTCTimestamp,
+  SeriesOptionsMap
 } from "lightweight-charts";
+type CrosshairMoveEvent = {
+  time?: UTCTimestamp;
+  point?: { x: number; y: number };
+  seriesData: Map<ISeriesApi<keyof SeriesOptionsMap>, any>;
+};
 
 export class ChartManager {
   private candleSeries: ISeriesApi<"Candlestick">;
@@ -116,8 +122,8 @@ export class ChartManager {
     
       // Subscribe to crosshair and show tooltip
       private subscribeToCrosshairMove(tooltipEl: HTMLDivElement) {
-        console.log("1")
-        this.chart.subscribeCrosshairMove((param) => {
+
+        this.chart.subscribeCrosshairMove((param:CrosshairMoveEvent) => {
           const tooltip = tooltipEl;
           if (!tooltip || !param.time || param.seriesData.size === 0) {
             tooltip.style.display = "none";

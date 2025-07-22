@@ -31,7 +31,7 @@ export const AskTable = ({ asks }: { asks: Array<{ price: string; quantity: stri
 
 function Ask({ price, quantity, total, maxTotal }: { 
     price: string; 
-    quantity: string; 
+    quantity: number; 
     total: number; 
     maxTotal: number 
 }) {

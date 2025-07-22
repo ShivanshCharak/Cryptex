@@ -1,10 +1,9 @@
 import { Dispatch, SetStateAction, useEffect } from "react";
-import axios from "axios";
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import { IoMdClose } from "react-icons/io";
 import { useState } from "react";
 import {toast} from 'react-toastify'
-import {useUserAuth} from '../../utils/context/UserContext'
+import { useUserAuth } from "@/app/utils/context/UserProvider";
 import {TUserInfo} from '../../utils/types'
 
 
@@ -13,7 +12,8 @@ type Props = {
 };
 
 export default function Signup({setShowAuth}:Props) {
-  const {setUser, user} = useUserAuth()
+  const {setUser, user,isAuth,setIsAuth} = useUserAuth()
+
   const [showPassword, setShowPassword] = useState(false);
   const [userData, setUserData] = useState<TUserInfo>({
     email: "",
@@ -39,16 +39,18 @@ export default function Signup({setShowAuth}:Props) {
       const fetched  = await data.json()
       if (fetched && fetched.user.username && fetched.user.email && fetched.user.id) {
         setUser({
-          username: String(fetched.user.username),
-          email: String(fetched.user.email),
-          id: String(fetched.user.id),
+          token:fetched.accessToken,
+          user:{
+            username: String(fetched.user.username),
+            email: String(fetched.user.email),
+            id: String(fetched.user.id)
+          }
         });
         console.log(user)
       }
       
-      
-      localStorage.setItem('token',fetched.accessToken)
-      
+      localStorage.setItem('cryptex-token',fetched.accessToken)
+      setIsAuth(true)
       setShowAuth(false)
       console.log(fetched)
       toast.success(fetched.message)
@@ -57,12 +59,6 @@ export default function Signup({setShowAuth}:Props) {
       console.log(error)
     }
   }
-  useEffect(()=>{
-    if(!localStorage.getItem('token')){
-      console.log("no token found")
-    }
-  },[localStorage.getItem('token')])
-
   const [authType,setAuthType] = useState('Login')
   useEffect(() => {
     document.body.style.overflow = "hidden";

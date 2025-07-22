@@ -25,10 +25,12 @@ export class Engine {
             // parse snapshot here...
         } else {
             console.log("INIT CALLED")
-            await this.loadOrdersToRedis();      // DB -> Redis
-            await this.updateOrderBook();        // Redis -> this.orderbooks[]
+            await this.loadOrdersToRedis();      
+            await this.updateOrderBook();        
             await this.loadUserBalancesToRedis();
             await this.loadCryptoToRedis();
+
+        
 
         }
     }
@@ -74,6 +76,8 @@ export class Engine {
                     const orderbook = this.orderbooks.find(o => (o?.ticker() === market));
 
                     // console.log(await this.depthFilter())
+
+
                     if (!orderbook) {
                         throw new Error("No orderbook found");
                     }
@@ -135,7 +139,6 @@ export class Engine {
         )
        
         // Till this code array and redis is syncing perfectly the trades is also great
-
 
     this.createDbTrades(fills, market, userId)
         await this.updateOrderBook()
@@ -310,6 +313,7 @@ export class Engine {
     async loadUserBalancesToRedis() {
 
         const accounts = await prisma.accountBalance.findMany({});
+        console.log(accounts)
 
         try {
 
@@ -321,9 +325,9 @@ export class Engine {
                 }
                 redis.batchLoad(redisKey, balanceData)
             })
-            console.log("✅ Balance loaded to Redis successfully");
+            console.log(" Balance loaded to Redis successfully");
         } catch (error) {
-            console.error("❌ Error occurred while saving balances to Redis", error);
+            console.error("Error occurred while saving balances to Redis", error);
         }
     }
 
@@ -434,7 +438,9 @@ export class Engine {
         }
     }
 
-
+    async syncOrderbookToDB(){
+        
+    }
     // setBaseBalances() {
     //     this.balances.set("1", {
     //         [BASE_CURRENCY]: {

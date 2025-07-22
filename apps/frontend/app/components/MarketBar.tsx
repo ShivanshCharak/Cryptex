@@ -9,29 +9,34 @@ export const MarketBar = ({ market }: { market: string }) => {
   const [volume, setVolume] = useState<number>(0);
   const { latestOrders, depth } = useOrders();
 
-  useEffect(() => {
-    if (!depth || !depth.bids.length || !depth.asks.length) return;
+useEffect(() => {
+  if (!depth || !depth.bids.length || !depth.asks.length) return;
 
-    const newTicker: Partial<Ticker> = {
-      firstPrice: !isNaN(Number(latestOrders))
-        ? latestOrders
-        : Number(depth.bids[0]?.price ?? 0),
-      lastPrice: depth.bids.reduce((max, trade: Partial<TTradeInfo>) => {
-        return Math.max(max, Number(trade.price ?? 0));
-      }, 0),
-      high: depth.asks.reduce((max, trade: Partial<TTradeInfo>) => {
-        return Math.max(max, Number(trade.price ?? 0));
-      }, 0),
-      low: depth.asks.reduce((min, trade: Partial<TTradeInfo>) => {
-        return Math.min(min, Number(trade.price ?? Infinity));
-      }, Infinity),
-      volume: depth.asks.reduce((sum, ask) => {
-        return sum + Number(ask.quantity ?? 0);
-      }, 0),
-    };
+  const firstPrice = !isNaN(Number(latestOrders))
+    ? latestOrders
+    : Number(depth.bids[0]?.price ?? 0);
+  const lastPrice = depth.bids.reduce((max, trade: Partial<TTradeInfo>) => {
+    return Math.max(max, Number(trade.price ?? 0));
+  }, 0);
 
-    setTicker(newTicker);
-  }, [depth, latestOrders]);
+  const newTicker: Partial<Ticker> = {
+    firstPrice,
+    lastPrice,
+    high: depth.asks.reduce((max, trade: Partial<TTradeInfo>) => {
+      return Math.max(max, Number(trade.price ?? 0));
+    }, 0),
+    low: depth.asks.reduce((min, trade: Partial<TTradeInfo>) => {
+      return Math.min(min, Number(trade.price ?? Infinity));
+    }, Infinity),
+    volume: depth.asks.reduce((sum, ask) => {
+      return sum + Number(ask.quantity ?? 0);
+    }, 0),
+    change: lastPrice && firstPrice ? ((lastPrice - firstPrice) / firstPrice) * 100 : 0, 
+  };
+
+  setTicker(newTicker);
+}, [depth, latestOrders]);
+
 
   return (
     
@@ -84,14 +89,15 @@ export const MarketBar = ({ market }: { market: string }) => {
                 </div>
               </div>
             </div>
-            <p
-              className={`text-sm font-medium tabular-nums leading-5 ${
-                ticker?.change >= 0 ? "text-green-500" : "text-red-500"
-              }`}
-            >
-              {ticker?.change >= 0 ? "+" : ""}
-              {(ticker?.lastPrice - ticker?.firstPrice * Math.random()) / 100}%
-            </p>
+           <p
+  className={`text-sm font-medium tabular-nums leading-5 ${
+    ticker?.change && ticker.change  >= 0 ? "text-green-500" : "text-red-500"
+  }`}
+>
+  {ticker?.change && ticker.change >= 0 ? "+" : ""}
+  {ticker?.change && ticker?.change.toFixed(2)}%
+</p>
+
           </div>
 
           {/* 24H High */}
@@ -151,7 +157,7 @@ export const MarketBar = ({ market }: { market: string }) => {
             </div>
             <p
               className={`mt-1 text-sm font-medium tabular-nums leading-5 ${
-                volume > ticker?.volume ? "text-red-500" : "text-green-500"
+                ticker.volume && volume > ticker?.volume ? "text-red-500" : "text-green-500"
               }`}
             >
               {ticker?.volume?.toLocaleString()}

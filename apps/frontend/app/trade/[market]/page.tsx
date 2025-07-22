@@ -8,17 +8,24 @@ import { useParams } from "next/navigation";
 import RangeSwitcherBar from "@/app/utils/RangeSwitcherBar";
 import { AreaChartView } from "@/app/components/AreaChartView";
 import { OrdersProvider } from "@/app/utils/context/DepthContext";
+import { useEffect } from "react";
 import { BaselineChartView } from "@/app/components/charts/BaselineChartView";
 import { useOrders } from "@/app/utils/context/DepthContext";
 import { ChartLoading } from "./loading";
+import { AuthInspector } from "@/app/utils/AuthInspector";
 import TopToolbar from "@/app/components/TopToolbar";
-``
+import { useRouter } from "next/navigation";
+
 
 export default function Page() {
     const { market } = useParams();
+    const router = useRouter()
+    const [token, setToken] = useState<string>("")
     const [range, setRange] = useState<"1D" | "1W" | "1M" | "1Y">("1D");
     const [chartType, setChartType] = useState<String>("barchart")
     const {depth} = useOrders()
+    
+
 
     return <div className="flex flex-row max:flex-col flex-1 over ">
         <div className="flex flex-col flex-1 ">

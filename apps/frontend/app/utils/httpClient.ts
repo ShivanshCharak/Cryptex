@@ -1,5 +1,6 @@
 import axios from "axios";
 import { Depth, KLine, Ticker, Trade } from "./types";
+import { TTradeInfo } from "../components/depth/type";
 
 // const BASE_URL = "https://exchange-proxy.100xdevs.com/api/v1";
 const BASE_URL = "http://localhost:3000/api/v1";

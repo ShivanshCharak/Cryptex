@@ -11,11 +11,10 @@ export interface UserToken {
 
 export  async function depositMoney(req: Request, res: Response):Promise<void> {
     try {
-        const { token, amountToDeposit } = req.body;
-        console.log(req.body)
+        const { amountToDeposit } = req.body;
 
-        if (!token || amountToDeposit === undefined) {
-            res.status(400).json({ error: "Token and amount are required." });
+        if (amountToDeposit === undefined) {
+            res.status(400).json({ error: " amount is required." });
             return
         }
 
@@ -24,11 +23,10 @@ export  async function depositMoney(req: Request, res: Response):Promise<void> {
             return
         }
 
-        const decoded = jwt.verify(token, 'gamma') as UserToken;
 
         const accountUpdated = await prisma.$transaction(async (tx) => {
             const existingUser = await tx.user.findUnique({
-                where: { email: decoded.email },
+                where: { email: req.user?.email },
                 select: { id: true }
             });
 

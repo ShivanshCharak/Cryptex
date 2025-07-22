@@ -1,11 +1,13 @@
 import { DynamicMiniChart } from "../utils/MiniChart";
 import { Trending, Clock_svg, Eye } from "../utils/SVGPool"
+import { JSX } from "react";
 import Image from "next/image"
 
 import { Fire_SVG } from "../utils/SVGPool"
 import React, { useEffect, useState } from 'react';
+import { TCryptoAssets, TDexScan } from "../utils/types";
 
-export default function MarketCards({ type, data, symbols = [] }) {
+export default function MarketCards({ type, data, symbols = [] }:{type:string,data:TCryptoAssets|TDexScan,symbols:Array<JSX.Element>}) {
 
   
     return (

@@ -23,10 +23,21 @@ prisma.$connect()
   
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
 app.use(cors({
-  origin:'http://localhost:3000',
-  credentials:true
-}))
+  origin: 'http://localhost:3002',
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
+// app.options('*', cors({
+//   origin: 'http://localhost:3002',
+//   credentials: true,
+//   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+//   allowedHeaders: ['Content-Type', 'Authorization']
+// }));
+
 
 
 app.use("/auth", auth);
@@ -41,5 +52,5 @@ process.on('SIGINT', async () => {
 });
 
 app.listen(3003, () => {
-  console.log("🚀 Server is running on port 3003");
+  console.log("Server is running on port 3003");
 });

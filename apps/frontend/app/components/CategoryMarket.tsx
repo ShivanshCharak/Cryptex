@@ -3,7 +3,7 @@ import { useState, useRef, useEffect } from "react";
 export default function CategoryMarket() {
   const [activeIndex, setActiveIndex] = useState(0);
   const [indicatorStyle, setIndicatorStyle] = useState({});
-  const itemRefs = useRef([]);
+  const itemRefs = useRef<(HTMLLIElement|null)[]>([]);
 
   const categories = [
     "All Crypto 🌐", "NFTs 🖼️", "Catgories 📂", "Token Unlocks 🔓",
@@ -29,7 +29,7 @@ export default function CategoryMarket() {
           <li
             key={i}
             onClick={() => setActiveIndex(i)}
-            ref={(el) => (itemRefs.current[i] = el)}
+            ref={(el) => {itemRefs.current[i] = el}}
             className={`cursor-pointer relative px-3 z-10 transition-colors duration-300 ${
               activeIndex === i ? "text-white" : "text-gray-400"
             }`}

@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import {BarChart, LineChart} from './SVGPool'
 
-const ranges = ["1D", "7D", "1M", "1Y"];
-
+const ranges = ["1D", "1w", "1M", "1Y"] as const;
+type RangeType = typeof ranges[number]
 export default function RangeSwitcherBar({
   activeRange,
   onRangeChange,
@@ -10,7 +10,7 @@ export default function RangeSwitcherBar({
   chartType
 }: {
   activeRange: string;
-  onRangeChange: (range: string) => void;
+  onRangeChange: (range: RangeType) => void;
   setChartType:(chartType:string)=>void
   chartType:String
 }) 

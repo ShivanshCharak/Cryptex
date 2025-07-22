@@ -9,7 +9,6 @@ const pgClient = new Client({
     host:"localhost"
 })
 pgClient.connect()
-
 async function main(){
     const redisClient = createClient()
     await redisClient.connect()
@@ -26,7 +25,7 @@ async function main(){
                 console.log("adding trade")
                 const price = data.data.price
                 const timestamp = new Date(data.data.timestamp)
-                const query="Insert into tata_prices(time,price) values($1,$2)";
+                const query="Insert into sol_prices(time,price) values($1,$2)";
                 const values=[timestamp,price]
                 await pgClient.query(query,values)
             }

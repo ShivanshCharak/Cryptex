@@ -15,16 +15,17 @@ import { MdSpeed } from 'react-icons/md';
 
 import { usePathname } from "next/navigation";
 import Link from 'next/link';
-import { useState, MouseEvent, FocusEvent } from "react";
+import { useState,  useEffect, useContext } from "react";
 import Image from "next/image";
 
-import { PrimaryButton, SuccessButton } from "./core/Button";
+import { SuccessButton } from "./core/Button";
 import { useRouter } from "next/navigation";
 import { Burger, Search, Tag } from "../utils/SVGPool";
 import { Portfolio_svg, Watchlist } from "../utils/SVGPool";
 import MegaMenu from "../utils/MenuItems";
 import Signup from './auth/Signup';
-import { useUserAuth } from '../utils/context/UserContext';
+import { useUserAuth } from '../utils/context/UserProvider';
+import { AuthInspector } from '../utils/AuthInspector';
 
 // Type definitions
 interface DropDownItem {
@@ -47,7 +48,6 @@ interface SignupProps {
   setShowAuth: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-// User type (adjust based on your actual user context type)
 interface User {
   token?: string;
   user: {
@@ -71,6 +71,21 @@ export const Appbar: React.FC = () => {
   const [showAuth, setShowAuth] = useState<boolean>(false);
   const [showMarkets, setShowMarkets] = useState<boolean>(false);
   const { user } = useUserAuth() as UserAuthContext;
+  const {isAuth, setIsAuth}= useUserAuth()
+
+  useEffect(() => {
+  const checkAuth = () => {
+    const token = localStorage.getItem('cryptex-token');
+    setIsAuth(!!token);
+  };
+
+  checkAuth();  
+  window.addEventListener('storage', checkAuth);
+
+  return () => {
+    window.removeEventListener('storage', checkAuth);
+  };
+}, []);
 
   const handleSearchFocus = (): void => {
     setShowMarkets(true);
@@ -193,7 +208,7 @@ export const Appbar: React.FC = () => {
             <Tag />
           </span>
           
-          {user?.token ? (
+          {isAuth? (
             <Link href="/deposit">
               <SuccessButton>Deposit</SuccessButton>
             </Link>

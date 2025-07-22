@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import {toast} from 'react-toastify'
+
 import { useAmount } from "../utils/context/AmountContext";
 export default function DepositMoney() {
   const [amountToDeposit, setAmountToDeposit] = useState("");
@@ -9,24 +10,27 @@ export default function DepositMoney() {
 
   const handleDeposit = async () => {
     try {
+      console.log(localStorage.getItem('cryptex-token'))
         if (!amountToDeposit || isNaN(Number(amountToDeposit))) {
           
           return;
         }
         const res  = await fetch("http://localhost:3003/account/deposit",{
             method:"POST",
-            body:JSON.stringify({amountToDeposit,token:localStorage.getItem("token")}),
             headers:{
-                
-                'Content-Type':"application/json"
-            }
+              'content-type':"application/json",
+              'authorization':`Bearer ${localStorage.getItem('cryptex-token')}`
+            },
+            body:JSON.stringify({amountToDeposit}),
+            credentials:"include"
         })
+
         const data = await res.json()
         toast.success(data.message)
         console.log(data)
         setAmount(data.account?.amount)
     } catch (error) {
-        throw new Error(error.message)
+        console.log(error)
     }
   };
 

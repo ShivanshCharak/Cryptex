@@ -26,6 +26,7 @@ export class RedisManager{
             const id = this.getRandomClientId()
             console.log(id)
             this.client.subscribe(id,(message)=>{
+                console.log(message)
                 this.client.unsubscribe(id)
                 resolve(JSON.parse(message))
             })

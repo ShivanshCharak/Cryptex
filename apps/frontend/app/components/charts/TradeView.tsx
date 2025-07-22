@@ -4,6 +4,7 @@ import { ChartManager } from "../../utils/charts/ChartManager";
 import { getKlines } from "../../utils/httpClient";
 import { useOrders } from "@/app/utils/context/DepthContext";
 import { KLine } from "../../utils/types";
+import { ColorType } from "lightweight-charts";
 
 
 function getStartTimestamp(range: string): number {
@@ -16,6 +17,7 @@ function getStartTimestamp(range: string): number {
     default: return now - 1000 * 60 * 60 * 24 * 7;
   }
 }
+// TRADEE VIEW CHANGE HERE IF ANY CHNAG
 
 export function TradeView({
   market,
@@ -50,7 +52,7 @@ useEffect(() => {
 
         const chartManager = new ChartManager(
           chartRef.current,
-          tooltipRef.current,
+          tooltipRef.current as HTMLDivElement,
           klineData
             .map((x) => ({
               close: parseFloat(x.close),
@@ -60,10 +62,11 @@ useEffect(() => {
               timestamp: new Date(x.end),
             }))
             .sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime()),
-          {
-            background: "#0e0f14",
-            color: "white",
-          }
+            {
+              background:ColorType.Solid,
+              color:"#0e0f14",
+            },
+          
         );
         //@ts-ignore
         chartManagerRef.current = chartManager;

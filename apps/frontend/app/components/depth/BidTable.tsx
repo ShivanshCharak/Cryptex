@@ -32,7 +32,7 @@ export const BidTable = ({ bids }: { bids: Array<{ price: string; quantity: stri
 
 function Bid({ price, quantity, total, maxTotal }: {
     price: string;
-    quantity: string;
+    quantity: number;
     total: number;
     maxTotal: number
 }) {
