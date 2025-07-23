@@ -8,8 +8,8 @@ export interface Order {
 }
 
 export interface Fill {
-    price: string;
-    qty: number;
+    price: number;
+    quantity: number;
     tradeId: number;
     otherUserId: string;
     orderId: string;

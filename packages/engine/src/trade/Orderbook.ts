@@ -32,13 +32,12 @@ export class Orderbook {
         }
     }
 
-    //TODO: Add self trade prevention
     async addOrder(order: Order): Promise<{
         fills: Fill[]
         executedQty: number,
     
     }> {
-        console.log("order.side",order.side)
+        // console.log("order.side",order.side)
         if (order.side === "buy") {
             const {executedQty, fills} = this.matchBid(order); 
 
@@ -78,7 +77,6 @@ export class Orderbook {
     //  sell = ask, bids=buy
     matchBid(order: Order): {fills: Fill[], executedQty: number} {
         const fills: Fill[] = [];
-        // console.log("asks",this.asks.length,this.asks,this.bids.length,this.bids)
         let executedQty = 0;
         
         for (let i = 0; i < this.asks.length; i++) {
@@ -89,18 +87,32 @@ export class Orderbook {
                 executedQty += filledQty;
                 
                 this.asks[i].filled += filledQty;
-                // console.log("asks price",this.asks[i].orderId,"asks quantityt",this.asks[i].quantity,"filledQty" ,filledQty, "executedQty", executedQty)
                 fills.push({
                     price: this.asks[i].price.toString(),
-                    qty: this.asks[i].quantity,
+                    quantity: this.asks[i].quantity,
                     tradeId: this.lastTradeId++,
                     otherUserId: this.asks[i].userId,
                     orderId: this.asks[i].orderId,
                     side:this.asks[i].side,
                     filled:this.asks[i].filled
                 });
-                console.log("fills",fills)
+                // console.log("fills",fills)
             }
+        }
+        console.log(order.quantity,executedQty)
+        if(order.quantity>executedQty){
+            this.bids.push({...order,filled:executedQty})
+            fills.push({
+                ...order,
+                filled:executedQty,
+                otherUserId:order.userId,
+                tradeId:this.lastTradeId++,
+                
+            })
+            console.log("Partially filled bids updated ", this.bids)
+        }
+        else{
+            console.log("COMPLETELY FILLED")
         }
         for (let i = 0; i < this.asks.length; i++) {
             if (this.asks[i].filled === this.asks[i].quantity) {
@@ -117,6 +129,7 @@ export class Orderbook {
 
     matchAsk(order: Order): {fills: Fill[], executedQty: number} {
         console.log("MATCHASK")
+        //  console.log("asks",this.bids)
         const fills: Fill[] = [];
         let executedQty = 0;
         for (let i = 0; i < this.bids.length; i++) {
@@ -129,7 +142,7 @@ export class Orderbook {
                 this.bids[i].filled += filledQty;
                 fills.push({
                     price: this.bids[i].price.toString(),
-                    qty: this.bids[i].quantity,
+                    quantity: this.bids[i].quantity,
                     tradeId: this.lastTradeId++,
                     otherUserId: this.bids[i].userId,
                     orderId: this.bids[i].orderId,
@@ -137,6 +150,10 @@ export class Orderbook {
                     filled:this.bids[i].filled
                 });
             }
+        }
+        if(order.quantity>executedQty){
+            this.asks.push({...order,filled:executedQty})
+            console.log("Partially filled bids updated ", this.bids)
         }
         for (let i = 0; i < this.bids.length; i++) {
             if (this.bids[i].filled === this.bids[i].quantity) {

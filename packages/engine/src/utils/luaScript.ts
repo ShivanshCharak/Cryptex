@@ -1,92 +1,79 @@
-export const AmountLockingScript = `
-local available = tonumber(redis.call("HGET", KEYS[1], "available") or 0)
-local locked = tonumber(redis.call("HGET", KEYS[1], "locked") or 0)
-local amount = tonumber(ARGV[1])
-
-if not available or not locked or not amount then
-return redis.error_reply("Invalid data: available=" .. tostring(available) .. ", locked=" .. tostring(locked) .. ", amount=" .. tostring(amount))
-end
-
-if available < amount then
-return 0
-else
-redis.call("HINCRBYFLOAT", KEYS[1], "available", -amount)
-redis.call("HINCRBYFLOAT", KEYS[1], "locked", amount)
-return 1
-end
-
-`
-
-
-export const AmountDepositScript = `
-        local available = tonumber(redis.call("HGET", KEYS[1], "available") or "0")
-        local amount = tonumber(ARGV[1])
-        
-        if not available or not amount then
-        return redis.error_reply("Invalid data: available=" .. tostring(available) .. ", amount=" .. tostring(amount))
-        end
-        
-        redis.call("HINCRBYFLOAT", KEYS[1], "available", amount)
-        return 1
-        
-        `;
-{` Have to write two scritps for the order of buying as well as selling
-`}
-
-//** Will need data orderid, userid, otherUser */
-// Step 1 :- The user who is buying has enough funds or not
-// step 2:- get the order with the help of orderid and update the filled value and if filled === quantity in the redis then delete that order and add take the userid from that redis hash and add the amount into the account of order
-// 
 export const OrderBuyScript = `
+-- Arguments
 local orderId = ARGV[1]
 local buyerUserId = ARGV[2]
 local sellerUserId = ARGV[3]
 local price = tonumber(ARGV[4])
-local quantity = tonumber(ARGV[5])  -- Total quantity
+local quantity = tonumber(ARGV[5]) -- Total quantity of the order
 local side = ARGV[6]
-local filled = tonumber(ARGV[7])  --AMOUNT FILLED 
+local filled = tonumber(ARGV[7])   -- Amount filled in this transaction
 
 -- Input validation
-if not price or not quantity then
-    return {err="Invalid price/quantity/quantity"}
+if not price or not quantity or not filled then
+return { err = "Invalid price/quantity/filled amount" }
 end
 
--- Step 1: Check buyer's money balance
-local buyerBalance = tonumber(redis.call("HGET", "balance:"..buyerUserId, "available")) or 0
+local orderKey = "order:" .. orderId
+if redis.call("EXISTS", orderKey) == 0 then
+  redis.call("HSET", orderKey,
+    "buyerUserId", buyerUserId,
+    "sellerUserId", sellerUserId,
+    "price", price,
+    "quantity", quantity,
+    "filled", 0,
+    "side", side
+  )
+end
 
-local totalCost = price * quantity
+-- Step 1: Check buyer's available balance
+local buyerBalanceKey = "balance:" .. buyerUserId
+local sellerBalanceKey = "balance:" .. sellerUserId
+local buyerBalance = tonumber(redis.call("HGET", buyerBalanceKey, "available")) or 0
+local prevFills = tonumber(redis.call("HGET",orderKey,'filled')) or 0
+local transactionAmount = (filled - prevFills)
+local totalCost = price * transactionAmount
 
 if buyerBalance < totalCost then
-    return {err="BUYER_INSUFFICIENT_FUNDS", needed=totalCost, available=buyerBalance}
-else
-        buyerBalance = buyerBalance+totalCost
-        redis.call("HSET","balance:"..buyerUserId,"available",buyerBalance)
-        
+  return {
+    err = "BUYER_INSUFFICIENT_FUNDS",
+    needed = totalCost,
+    available = buyerBalance
+  }
 end
--- WHAT IF USER SENDS MORE FILLING QUANTITY IN THAT CASE IT WILL BECOME +
 
--- Step 2: Update order
-local orderKey = "order:"..orderId
-local currentFilled = tonumber(redis.call("HGET", orderKey, "filled")) or 0
-local newFilled = filled
-redis.call("HSET", orderKey, "filled", newFilled)
+-- Step 2: Deduct funds from buyer
+redis.call("HINCRBYFLOAT", buyerBalanceKey, "available", -totalCost)
+redis.call("HINCRBYFLOAT", sellerBalanceKey, "available", totalCost)
 
--- Step 3: Delete if fully filled
+-- Step 3: Upsert order
+
+
+-- Step 4: Update filled amount
+redis.call("HSET", orderKey, "filled", filled)
+
+-- Step 5: Check if order is fully filled
 local orderQuantity = tonumber(redis.call("HGET", orderKey, "quantity")) or 0
-if newFilled >= orderQuantity then
-    redis.call("DEL", orderKey)
-    return {
-        ok="ORDER_COMPLETE",
-        buyerUserId=buyerUserId,
-        sellerUserId=sellerUserId,
-        amount=totalCost,
-        cryptoAmount=filled
-    }
+
+if filled >= orderQuantity then
+  redis.call("DEL", orderKey)
+  return {
+    "ok","ORDER_COMPLETE",
+    "buyerUserId", buyerUserId,
+    "sellerUserId",  sellerUserId,
+    "totalCost", totalCost,
+    "filled", filled,
+    "newfill", transactionAmount,
+    "price", price
+  }
 else
-    return {
-        ok="PARTIAL_FILL",
-        amount=totalCost,
-        cryptoAmount=filled
-    }
+  return {
+    "ok", "PARTIAL_FILL",
+   "buyerUserId", buyerUserId,
+    "sellerUserId",  sellerUserId,
+    "totalCost", totalCost,
+    "filled", filled,
+    "newfill", transactionAmount,
+    "price", price
+  }
 end
-`
+`;
