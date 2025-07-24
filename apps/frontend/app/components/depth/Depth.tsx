@@ -30,65 +30,101 @@ export function Depth({ market }: { market: string }) {
     console.log("useffect", depth);
   }, [bids, asks]);
   useEffect(() => {
+
     SignalingManager.getInstance().registerCallback(
       "depth",
       (PostTradeDepth: TDepth) => {
         console.log(`[${Date.now()}] depth update`, PostTradeDepth);
-
+        console.log("bids new",PostTradeDepth.bids)
+        console.log("asks new",PostTradeDepth.asks)
         setBids((originalBids) => {
-          const updatedBids: TTradeInfo[] = [];
-          const depthMap = new Map(
-            PostTradeDepth.bids.map((bid) => [bid.orderId, bid])
-          );
+          // const updatedBids: TTradeInfo[] = [];
+   const newBids: typeof originalBids = [] 
 
-          for (const bid of originalBids) {
-            const depth = depthMap.get(bid.orderId);
-            if (depth) {
-              updatedBids.push({
-                ...bid,
-                quantity: depth.quantity,
-                filled: 0,
-              });
-            } else {
-              updatedBids.push({ ...bid });
+          const askMap = new Map(originalBids.map((bid) => [bid.orderId, bid])); //o(n)
+          // Traverse updated depth came from backend, askMap gonna have all the asks array
+          const updatedBid = PostTradeDepth.bids
+          let deletedSet= new Set()
+          for (let i:number = 0; i < updatedBid.length; i++) { //0(m)
+            const staleBid = askMap.get(updatedBid[i].orderId) // set and filter approach
+            const remainingQuantity =  updatedBid[i].quantity-updatedBid[i].filled
+            if(remainingQuantity<=0){
+              deletedSet.add(updatedBid[i].orderId)
+            }
+            if(remainingQuantity>0){
+              if(staleBid){
+                newBids.push({
+                  ...staleBid,
+                  quantity:remainingQuantity,
+                  filled:0
+                })
+              }else{
+            
+                newBids.push(updatedBid[i])
             }
           }
+        }
+        const asksSet = new Set(newBids.map((bid)=>bid.orderId))
+        let filteredSet = originalBids.filter((val,index)=> !asksSet.has(val.orderId))
+        filteredSet = filteredSet.filter((val,index)=>!deletedSet.has(val.orderId))
 
-          return updatedBids;
+
+        const newArr = newBids.concat(filteredSet)
+          return newArr.sort((a, b) => Number(a.price) - Number(b.price));
         });
 
+        // ***
+        //  convert the bids and asks into maps
+        // traverse the updated bids which is coming from the backend
+        // and for any matched bid with its orderid update its quantity
+        // and if the filled == quantity then eject that order
+        // ***
         setAsks((originalAsks) => {
-          console.log(
-            "original ask",
-            originalAsks,
-            PostTradeDepth.asks,
-            PostTradeDepth.bids
-          );
-          const askAfterUpdate: TTradeInfo[] = [];
-          const updatedAsks: TTradeInfo[] = [];
-          const depthMap = new Map(
-            PostTradeDepth.asks.map((ask) => [ask.orderId, ask])
-          );
-          for (const ask of originalAsks) {
-            const depth = depthMap.get(ask.orderId);
-            if (depth) {
-              updatedAsks.push({
-                ...ask,
-                quantity: depth.quantity,
-                filled: 0,
-              });
-            } else {
-              updatedAsks.push({ ...ask });
+          // Converting ask into map for faster lookups
+          const newAsks: typeof originalAsks = [] 
+
+          const askMap = new Map(originalAsks.map((ask) => [ask.orderId, ask])); //o(n)
+          // Traverse updated depth came from backend, askMap gonna have all the asks array
+          const updatedAsk = PostTradeDepth.asks
+          console.log("updatedasks",updatedAsk,updatedAsk.length)
+          let deletedSet= new Set()
+          for (let i:number = 0; i < updatedAsk.length; i++) { //0(m)
+            console.log(i)
+            const staleAsk = askMap.get(updatedAsk[i].orderId) // set and filter approach
+            console.log(staleAsk)
+            const remainingQuantity =  updatedAsk[i].quantity-updatedAsk[i].filled
+            if(remainingQuantity<=0){
+              deletedSet.add(updatedAsk[i].orderId)
+            }
+            if(remainingQuantity>0){
+              if(staleAsk){
+                newAsks.push({
+                  ...staleAsk,
+                  quantity:remainingQuantity,
+                  filled:0
+                })
+              }else{
+            
+                newAsks.push(updatedAsk[i])
             }
           }
+        }
+        console.log("updating asks",newAsks)
+        const asksSet = new Set(newAsks.map((asks)=>asks.orderId))
+        let filteredSet = originalAsks.filter((val,index)=> !asksSet.has(val.orderId))
+        filteredSet = filteredSet.filter((val,index)=>!deletedSet.has(val.orderId))
 
-          // return askAfterUpdate.sort((a, b) => Number(a.price) - Number(b.price));
-          return updatedAsks;
+
+        const newArr = newAsks.concat(filteredSet)
+        console.log(newArr)
+          return newArr.sort((a, b) => Number(a.price) - Number(b.price));
+
         });
-        console.log(bids)
+        console.log(bids);
       },
       `DEPTH-${market}`
     );
+    console.log("bids asks", bids, asks);
 
     SignalingManager.getInstance().sendMessage({
       method: "SUBSCRIBE",
@@ -135,7 +171,7 @@ export function Depth({ market }: { market: string }) {
       </div>
 
       {/* Shimmer loading UI if depth not available */}
-      {!depth?.bids?.length || !depth?.asks?.length ? (
+      {/* {!depth?.bids?.length || !depth?.asks?.length ? (
         <div className="p-4 space-y-3">
           {[...Array(10)].map((_, i) => (
             <div key={i} className="flex justify-between animate-pulse">
@@ -146,12 +182,12 @@ export function Depth({ market }: { market: string }) {
           ))}
         </div>
       ) : DepthType === "Book" ? (
-        <>
+        <> */}
           <TableHeader />
           {asks && <AskTable asks={asks} />}
           {latestOrders && <div>{latestOrders}</div>}
           {bids && <BidTable bids={bids} />}
-        </>
+        {/* </>
       ) : (
         <>
           {trades.length > 0 ? (
@@ -163,7 +199,7 @@ export function Depth({ market }: { market: string }) {
             <h1 className="text-slate-500 text-sm mt-4">No trades found</h1>
           )}
         </>
-      )}
+      )} */}
     </div>
   );
 }

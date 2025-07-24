@@ -2,7 +2,7 @@ import { ClubDepth } from "./BidTable";
 
 export const AskTable = ({ asks }: { asks: Array<{ price: string; quantity: string }> }) => {
     let currentTotal = 0;
-    {console.log("Updated",asks)}
+    
     const relevantAsks = ClubDepth(asks)
     relevantAsks.reverse();
 

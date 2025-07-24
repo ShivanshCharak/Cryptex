@@ -2,8 +2,8 @@ export type TTradeInfo = {
     filled: number,
     market:string,
     orderId:string,
-    price:string,
-    quantity:string,
+    price:number,
+    quantity:number,
     side:string,
     userId:string,
 }

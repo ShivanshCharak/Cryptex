@@ -33,6 +33,7 @@ export class Engine {
   }
 
   async process({ message, clientId }: { message: any; clientId: string }) {
+    console.log(message,clientId)
     switch (message.type) {
       case "CREATE_ORDER": {
         try {
@@ -94,7 +95,7 @@ export class Engine {
   // Base asset:- TATA, Quote asset:- Inr
   async createOrder(
     market: string,
-    price: string,
+    price: number,
     quantity: number,
     side: "buy" | "sell",
     userId: string
@@ -123,7 +124,7 @@ export class Engine {
     const { fills, executedQty } = await orderbook.addOrder(order);
     await Promise.all(
       fills.map((fill) =>{
-        console.log(fill)
+
        return  this.InitiateRedisTrades(
           fill.orderId,
           userId,
@@ -172,9 +173,7 @@ export class Engine {
           side,
           filled?.toString(),
         ],
-      });
-      console.log("result",result)
-      
+      });      
       this.syncArraysWithRedisResult(result, orderId, price, side);
 
 
@@ -288,7 +287,7 @@ export class Engine {
   }
   publisWsDepthUpdates(
     fills: Fill[],
-    price: string,
+    price: number,
     side: "buy" | "sell",
     market: string
   ) {
@@ -328,7 +327,7 @@ export class Engine {
       console.log("No depth changes to publish");
       return;
     }
-    
+    console.log(updatedAsk,updatedBid)
 
     RedisManager.getInstance().publishMessage(`depth@${market}`, {
       stream: `depth@${market}`,
