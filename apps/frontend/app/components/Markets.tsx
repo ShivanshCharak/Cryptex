@@ -4,9 +4,14 @@ import { useEffect, useState } from "react";
 import { Ticker } from "../utils/types";
 import { getTickers } from "../utils/httpClient";
 import { useRouter } from "next/navigation";
+import { cryptoData } from "./CryptoTable";
+import Image from "next/image";
+import { DynamicMiniChart } from "../utils/MiniChart";
+
 
 export const Markets = () => {
   const [tickers, setTickers] = useState<Ticker[]>();
+  const router = useRouter()
 
   useEffect(() => {
     getTickers().then((m) => setTickers(m));
@@ -16,10 +21,59 @@ export const Markets = () => {
     <div className="flex flex-col flex-1 max-w-[1280px] w-full">
       <div className="flex flex-col min-w-[700px] flex-1 w-full">
         <div className="flex flex-col w-full rounded-lg bg-baseBackgroundL1 px-5 py-3">
-          <table className="w-full table-auto">
+          {/* <table className="w-full table-auto">
+            
             <MarketHeader />
             {tickers?.map((m) => <MarketRow market={m} />)}
-          </table>
+            
+          </table> */}
+            <table className="min-w-full text-sm">
+                  <thead className="">
+                    <tr className="text-left border-b border-gray-700 text-gray-400">
+                      <th className="py-5">#</th>
+                      <th className="py-5">Name</th>
+                      <th>Price</th>
+                      <th>1h %</th>
+                      <th>24h %</th>
+                      <th>7d %</th>
+                      <th>Market Cap</th>
+                      <th>Volume (24h)</th>
+                      <th>Circulating Supply</th>
+                      <th>Last 7 Days</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {cryptoData.map((coin) => (
+                      <tr
+                        key={coin.rank}
+                        className="border-b border-gray-800 cursor-pointer hover:bg-gray-900 duration-150 transition-all" onClick={()=>router.push("/trade/SOL_USDC")}
+                      >
+                        <td className="py-7 ">
+                          <span>{coin.rank}</span>
+                        </td>
+          
+                        <td className="py-7 font-semibold flex w-[100px] justify-between">
+                          <Image
+                            src={coin.image}
+                            alt="alt"
+                            width={20}
+                            height={20}
+                            className="mr-2"
+                          />
+                          {coin.name} <span className="text-gray-500">{coin.symbol}</span>
+                        </td>
+                        <td className="py-2">{coin.price}</td>
+                        <td className="py-2 text-green-400">{coin.h1}</td>
+                        <td className="py-2 text-red-400">{coin.h24}</td>
+                        <td className="py-2 text-red-400">{coin.h7}</td>
+                        <td className="py-2">{coin.marketCap}</td>
+                        <td className="py-2">{coin.volume}</td>
+                        <td className="py-2">{coin.supply}</td>
+                        <DynamicMiniChart width={40} />
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
         </div>
       </div>
     </div>

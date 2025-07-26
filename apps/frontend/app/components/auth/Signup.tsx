@@ -1,65 +1,90 @@
-import { Dispatch, SetStateAction, useEffect } from "react";
-import { FaEye, FaEyeSlash } from 'react-icons/fa';
-import { IoMdClose } from "react-icons/io";
-import { useState } from "react";
-import {toast} from 'react-toastify'
-import { useUserAuth } from "@/app/utils/context/UserProvider";
-import {TUserInfo} from '../../utils/types'
+import { useState, useEffect } from "react";
+import { Eye, EyeOff, X, Lock, Mail, User, Loader2 } from "lucide-react";
 
-
-type Props = {
-  setShowAuth: Dispatch<SetStateAction<boolean>>;
+type TUserInfo = {
+  email: string;
+  password: string;
+  username: string;
 };
 
-export default function Signup({setShowAuth}:Props) {
-  const {setUser, user,isAuth,setIsAuth} = useUserAuth()
+type Props = {
+  setShowAuth: (show: boolean) => void;
+};
+
+// Mock context hook
+const useUserAuth = () => ({
+  setUser: (user: any) => console.log('Setting user:', user),
+  user: null,
+  isAuth: false,
+  setIsAuth: (auth: boolean) => console.log('Setting auth:', auth)
+});
+
+const toast = {
+  success: (msg: string) => alert(`Success: ${msg}`),
+  error: (msg: string) => alert(`Error: ${msg}`)
+};
+
+export default function AuthModal({ setShowAuth = () => {} }: Partial<Props>) {
+  const { setUser, setIsAuth } = useUserAuth();
 
   const [showPassword, setShowPassword] = useState(false);
   const [userData, setUserData] = useState<TUserInfo>({
     email: "",
     password: "",
-    username:""
+    username: ""
   });
+  const [authType, setAuthType] = useState<'Login' | 'Signup'>('Login');
+  const [isLoading, setIsLoading] = useState(false);
+  const [errors, setErrors] = useState<Partial<TUserInfo>>({});
 
+  const validateForm = () => {
+    const newErrors: Partial<TUserInfo> = {};
+    if (!userData.email) newErrors.email = "Email is required";
+    else if (!/\S+@\S+\.\S+/.test(userData.email)) newErrors.email = "Invalid email format";
+    if (!userData.password) newErrors.password = "Password is required";
+    else if (userData.password.length < 6) newErrors.password = "Password must be at least 6 characters";
+    if (authType === 'Signup' && !userData.username) newErrors.username = "Username is required";
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
-  async function handleSubmit(){
+  async function handleSubmit() {
+    if (!validateForm()) return;
+    setIsLoading(true);
+    setErrors({});
 
     try {
-      console.log(`http://localhost:3003/auth/${authType}`)
-      const data  = await fetch(`http://localhost:3003/auth/${authType}`,{
-        method:'POST',
-        credentials:'include',
-        body:JSON.stringify(
-          userData
-        ),
-        headers:{
-          "content-type":"application/json"
-        }
-      })
-      const fetched  = await data.json()
-      if (fetched && fetched.user.username && fetched.user.email && fetched.user.id) {
+      const res = await fetch(`http://localhost:3003/auth/${authType}`, {
+        method: 'POST',
+        credentials: 'include',
+        body: JSON.stringify(userData),
+        headers: { "content-type": "application/json" }
+      });
+
+      const fetched = await res.json();
+      if (fetched?.user?.username && fetched?.user?.email && fetched?.user?.id) {
         setUser({
-          token:fetched.accessToken,
-          user:{
+          token: fetched.accessToken,
+          user: {
             username: String(fetched.user.username),
             email: String(fetched.user.email),
             id: String(fetched.user.id)
           }
         });
-        console.log(user)
+        localStorage.setItem('cryptex-token', fetched.accessToken);
+        setIsAuth(true);
+        setShowAuth(false);
+        toast.success(fetched.message);
+      } else {
+        toast.error(fetched.message || 'Authentication failed');
       }
-      
-      localStorage.setItem('cryptex-token',fetched.accessToken)
-      setIsAuth(true)
-      setShowAuth(false)
-      console.log(fetched)
-      toast.success(fetched.message)
-      
     } catch (error) {
-      console.log(error)
+      toast.error('Network error. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
   }
-  const [authType,setAuthType] = useState('Login')
+
   useEffect(() => {
     document.body.style.overflow = "hidden";
     return () => {
@@ -67,124 +92,128 @@ export default function Signup({setShowAuth}:Props) {
     };
   }, []);
 
-  
-    const onClose =()=>setShowAuth(false)
-  
+  const inputClasses = (field: keyof TUserInfo) => `
+    w-full bg-slate-800 border rounded-xl px-4 py-4 pl-12 text-white placeholder-slate-400
+    focus:outline-none transition-all duration-300
+    ${errors[field] ? 'border-red-500 bg-red-500/10' : 'border-slate-600 hover:border-slate-500'}
+  `;
+
   return (
-    <div className={`  fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50` }>
-      <div className={` ${authType==="Signup"?"h-[600px]":"h-[500px]"} relative bg-[#222531] w-[500px]  p-5 rounded-md` }>
-        <button
-          onClick={onClose}
-          className="absolute top-3 right-3 text-gray-300 hover:text-white text-xl"
-        >
-          <IoMdClose />
-        </button>
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="relative w-full max-w-md">
+        <div className="relative bg-slate-900 border border-slate-700 rounded-2xl overflow-hidden shadow-md">
+          <div className="relative p-8">
+            <button
+              onClick={() => setShowAuth(false)}
+              className="absolute top-4 right-4 text-slate-400 hover:text-white transition p-2"
+            >
+              <X size={20} />
+            </button>
 
-        <div className="flex w-[200px] justify-around text-white">
-          <span className="cursor-pointer" onClick={()=>{
-            setAuthType("Login")
-          }}>Login</span>
-          <span className="cursor-pointer" onClick={()=>{
-            setAuthType("Signup")
-          }}>Signup</span>
-        </div>
-        <hr className="w-[70px] mt-5 ml-3" />
+            <div className="text-center mb-8">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-slate-800 rounded-xl mb-4">
+                <Lock className="text-white" size={26} />
+              </div>
+              <h1 className="text-3xl font-bold text-white mb-2">Cryptex</h1>
+              <p className="text-slate-400 text-sm">{authType === 'Login' ? 'Welcome back' : 'Create your account'}</p>
+            </div>
 
-        <form onSubmit={(e)=> {e.preventDefault(); handleSubmit()}}>
-          <div className={`text-sm flex flex-col  mt-10 relative text-white   ${authType==="Signup"?"h-[300px]":"h-[200px]"}`}>
-            {authType==="Signup"&&
-            <>
-             <label className="mb-1">Username</label>
-            <input
-              type="text"
-              onChange={(e)=>(
-                setUserData((prev)=>({...prev,username:e.target.value}))
+            <div className="flex bg-slate-800 rounded-xl p-1.5 mb-6 border border-slate-700">
+              {(['Login', 'Signup'] as const).map((type) => (
+                <button
+                  key={type}
+                  onClick={() => setAuthType(type)}
+                  className={`flex-1 py-3 rounded-lg font-semibold transition ${
+                    authType === type
+                      ? 'bg-slate-700 text-white'
+                      : 'text-slate-400 hover:text-white'
+                  }`}
+                >
+                  {type}
+                </button>
+              ))}
+            </div>
+
+            <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }} className="space-y-6">
+              {authType === 'Signup' && (
+                <div>
+                  <div className="relative">
+                    <User className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                    <input
+                      type="text"
+                      value={userData.username}
+                      onChange={(e) => setUserData(prev => ({ ...prev, username: e.target.value }))}
+                      className={inputClasses('username')}
+                      placeholder="Username"
+                      disabled={isLoading}
+                    />
+                  </div>
+                  {errors.username && <p className="text-red-400 text-sm">{errors.username}</p>}
+                </div>
               )}
-              className="bg-[#171924] mb-5 border-none outline-blue-500 p-4 rounded-md"
-              placeholder="Enter your Username here..."
-            />
-            </>
-              
-            }
-         
-            
-            <label className="mb-1">Email Address</label>
-            <input
-              type="text"
-              onChange={(e) =>
-                setUserData((prev) => ({ ...prev, email: e.target.value }))
-              }
-              className="bg-[#171924] border-none outline-blue-500 p-4 rounded-md"
-              placeholder="Enter your email address..."
-            />
-            <label className="mb-1 mt-5">Password</label>
-            <input
-              onChange={(e) =>
-                setUserData((prev) => ({ ...prev, password: e.target.value }))
-              }
-              type={showPassword ? "text" : "password"}
-              className="bg-[#171924] border-none outline-blue-500 p-4 rounded-md"
-              placeholder="Enter your password"
-            />
-            
-            <button
-              type="button"
-              className="absolute right-3 top-[72%] transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-              onClick={() => setShowPassword(!showPassword)}
-            >
-              {showPassword ? <FaEyeSlash /> : <FaEye />}
-            </button>
-            <button
-              className={`mt-4 text-lg rounded-md p-4 ${
-                userData.email.length > 0 && userData.password.length > 0
-                  ? "bg-[#2d4396] cursor-pointer"
-                  : "bg-[#2d4396]/50 cursor-not-allowed"
-              }`}
-              disabled={
-                !(userData.email.length > 0 && userData.password.length > 0)
-              }
-            >
-              {authType}
-            </button>
+
+              <div>
+                <div className="relative">
+                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                  <input
+                    type="email"
+                    value={userData.email}
+                    onChange={(e) => setUserData(prev => ({ ...prev, email: e.target.value }))}
+                    className={inputClasses('email')}
+                    placeholder="Email"
+                    disabled={isLoading}
+                  />
+                </div>
+                {errors.email && <p className="text-red-400 text-sm">{errors.email}</p>}
+              </div>
+
+              <div>
+                <div className="relative">
+                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    value={userData.password}
+                    onChange={(e) => setUserData(prev => ({ ...prev, password: e.target.value }))}
+                    className={inputClasses('password')}
+                    placeholder="Password"
+                    disabled={isLoading}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400"
+                  >
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
+                {errors.password && <p className="text-red-400 text-sm">{errors.password}</p>}
+              </div>
+
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-xl transition disabled:opacity-50"
+              >
+                {isLoading ? (
+                  <div className="flex justify-center items-center gap-2">
+                    <Loader2 size={18} className="animate-spin" />
+                    <span>Loading...</span>
+                  </div>
+                ) : authType}
+              </button>
+            </form>
+
+            <div className="mt-6 text-center text-sm text-slate-500">
+              {authType === 'Login' ? "Don't have an account?" : 'Already have an account?'}{" "}
+              <button
+                className="text-blue-400 hover:text-blue-300 font-medium"
+                onClick={() => setAuthType(authType === 'Login' ? 'Signup' : 'Login')}
+              >
+                {authType === 'Login' ? 'Sign up' : 'Log in'}
+              </button>
+            </div>
           </div>
-        </form>
-        <div className="flex mt-14 items-center text-white">
-          <hr className="bg-slate-700 w-[45%]" />
-          <div className="ml-2">OR</div>
-          <hr className="ml-2 bg-slate-700 w-[45%]" />
         </div>
-        <button className="mt-4 p-3 rounded-md outline outline-1 flex items-center justify-center outline-gray-500 w-full font-md text-white hover:bg-gray-600">
-          {/* Google Icon */}
-          <svg
-            className="mr-[5px]"
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 128 128"
-            width="1em"
-            height="1em"
-          >
-            <path
-              fill="#fff"
-              d="M44.59 4.21a63.28 63.28 0 0 0 4.33 120.9a67.6 67.6 0 0 0 32.36.35a57.13 57.13 0 0 0 25.9-13.46a57.44 57.44 0 0 0 16-26.26a74.33 74.33 0 0 0 1.61-33.58H65.27v24.69h34.47a29.72 29.72 0 0 1-12.66 19.52a36.16 36.16 0 0 1-13.93 5.5a41.29 41.29 0 0 1-15.1 0A37.16 37.16 0 0 1 44 95.74a39.3 39.3 0 0 1-14.5-19.42a38.31 38.31 0 0 1 0-24.63a39.25 39.25 0 0 1 9.18-14.91A37.17 37.17 0 0 1 76.13 27a34.28 34.28 0 0 1 13.64 8q5.83-5.8 11.64-11.63c2-2.09 4.18-4.08 6.15-6.22A61.22 61.22 0 0 0 87.2 4.59a64 64 0 0 0-42.61-.38z"
-            />
-            <path
-              fill="#e33629"
-              d="M44.59 4.21a64 64 0 0 1 42.61.37a61.22 61.22 0 0 1 20.35 12.62c-2 2.14-4.11 4.14-6.15 6.22Q95.58 29.23 89.77 35a34.28 34.28 0 0 0-13.64-8a37.17 37.17 0 0 0-37.46 9.74a39.25 39.25 0 0 0-9.18 14.91L8.76 35.6A63.53 63.53 0 0 1 44.59 4.21z"
-            />
-            <path
-              fill="#f8bd00"
-              d="M3.26 51.5a62.93 62.93 0 0 1 5.5-15.9l20.73 16.09a38.31 38.31 0 0 0 0 24.63q-10.36 8-20.73 16.08a63.33 63.33 0 0 1-5.5-40.9z"
-            />
-            <path
-              fill="#587dbd"
-              d="M65.27 52.15h59.52a74.33 74.33 0 0 1-1.61 33.58a57.44 57.44 0 0 1-16 26.26c-6.69-5.22-13.41-10.4-20.1-15.62a29.72 29.72 0 0 0 12.66-19.54H65.27c-.01-8.22 0-16.45 0-24.68z"
-            />
-            <path
-              fill="#319f43"
-              d="M8.75 92.4q10.37-8 20.73-16.08A39.3 39.3 0 0 0 44 95.74a37.16 37.16 0 0 0 14.08 6.08a41.29 41.29 0 0 0 15.1 0a36.16 36.16 0 0 0 13.93-5.5c6.69 5.22 13.41 10.4 20.1 15.62a57.13 57.13 0 0 1-25.9 13.47a67.6 67.6 0 0 1-32.36-.35a63 63 0 0 1-23-11.59A63.73 63.73 0 0 1 8.75 92.4z"
-            />
-          </svg>
-          <span>Continue with Google</span>
-        </button>
       </div>
     </div>
   );

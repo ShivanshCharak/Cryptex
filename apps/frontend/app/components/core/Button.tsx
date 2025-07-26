@@ -1,16 +1,32 @@
+import React from "react";
 
-export const PrimaryButton = ({ children, onClick }: { children: string, onClick?: () => void }) => {
-    return <button type="button" className="text-center font-semibold rounded-lg focus:ring-blue-200 focus:none focus:outline-none hover:opacity-90 disabled:opacity-80 disabled:hover:opacity-80 relative overflow-hidden h-[32px] text-sm px-3 py-1.5 mr-4 ">
-        <div className="absolute inset-0 bg-blue-500 opacity-[16%]"></div>
-        <div className="flex flex-row items-center justify-center gap-4"><p className="text-blue-500">{children}</p></div>
+type ButtonProps = {
+  children: React.ReactNode;
+  variant?: "Green" | "Red" | "Blue"|"Login";
+
+  onClick: () => void;
+};
+
+export const Button = ({ children, variant = "Login", onClick }: ButtonProps) => {
+  const variantClass = {
+    Green: { bg: "bg-green-500", text: "text-green-700",width:"w-[80px]", height:'h-[35px]' },
+    Red: { bg: "bg-red-500", text: "text-red-700",width:"w-[80px]", height:'h-[35px]' },
+    Blue: { bg: "bg-blue-500", text: "text-blue-700",width:"w-[80px]", height:'h-[35px]' },
+    Login:{width:"w-[80px]", height:'h-[35px]',bg: "bg-blue-500", text: "text-blue-700"  }
+    
+  };
+
+  const applied = variantClass[variant];
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`${variantClass[variant].width} relative overflow-hidden text-sm px-3 py-1.5 mr-4 h-[32px] font-semibold rounded-lg focus:outline-none hover:opacity-90 disabled:opacity-80 disabled:hover:opacity-80 ${applied.bg}`}
+    >
+      <div className={`relative z-10 flex items-center justify-center gap-4 `}>
+        {children}
+      </div>
     </button>
-
-} 
-
-export const SuccessButton = ({ children, onClick }: { children: string, onClick?: () => void }) => {
-    return <button type="button" className="text-center font-semibold rounded-lg focus:ring-green-200 focus:none focus:outline-none hover:opacity-90 disabled:opacity-80 disabled:hover:opacity-80 relative overflow-hidden h-[32px] text-sm px-3 py-1.5 mr-4 ">
-        <div className="absolute inset-0 bg-green-500 opacity-[16%]"></div>
-        <div className="flex flex-row items-center justify-center gap-4"><p className="text-green-500">{children}</p></div>
-    </button>
-
-} 
+  );
+};

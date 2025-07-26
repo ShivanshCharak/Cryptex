@@ -7,8 +7,12 @@ import auth from './routes/authRouter';
 import moneyDeposit from './routes/moneyRouter'; 
 import cryptoDeposit from './routes/cryptoRouter';
 import orderDeposit from './routes/orderRouter'
+import {register,postgres_connection_status,timescaleDb_connection_status} from './Monitoring/metrics'
 import { authMiddleware } from './middleware/authMiddleware';
-
+import { databaseConnections } from './premhelper';
+import { metricsRouter } from './Monitoring/metricsRoute';
+import {healthRouter} from './Monitoring/healthRouter'
+import { incrementConnection,decrementConnection } from './Monitoring/healthRouter';
 dotenv.config();
 
 export const app = express();
@@ -24,6 +28,8 @@ prisma.$connect()
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+
+
 app.use(cors({
   origin: 'http://localhost:3002',
   credentials: true,
@@ -31,19 +37,21 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
-// app.options('*', cors({
-//   origin: 'http://localhost:3002',
-//   credentials: true,
-//   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-//   allowedHeaders: ['Content-Type', 'Authorization']
-// }));
-
-
+app.on("connection",(socket)=>{
+    incrementConnection()
+    app.on("close",()=>{
+        decrementConnection();
+    })
+})
 
 app.use("/auth", auth);
 app.use("/account" ,authMiddleware ,moneyDeposit); // ← attaches /account/deposit
 app.use("/crypto",authMiddleware ,cryptoDeposit);
 app.use("/order",authMiddleware ,orderDeposit);
+app.use("/metrics",metricsRouter)
+app.use("/health",healthRouter)
+
+
 
 
 process.on('SIGINT', async () => {
