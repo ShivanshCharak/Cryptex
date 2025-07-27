@@ -105,3 +105,53 @@ export function LineChart(){
         </svg>
     </>)
 }
+
+
+// Your existing icons
+// export const BarChart = () => (
+//   <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+//     <path d="M2 2v12h12M4 10v2h2v-2zM7 8v4h2V8zM10 6v6h2V6zM13 4v8h2V4z"/>
+//   </svg>
+// );
+
+// export const LineChart = () => (
+//   <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+//     <path d="M2 12L6 8l3 3 5-5" stroke="currentColor" strokeWidth="2" fill="none"/>
+//     <circle cx="2" cy="12" r="1.5" fill="currentColor"/>
+//     <circle cx="6" cy="8" r="1.5" fill="currentColor"/>
+//     <circle cx="9" cy="11" r="1.5" fill="currentColor"/>
+//     <circle cx="14" cy="6" r="1.5" fill="currentColor"/>
+//   </svg>
+// );
+
+// New chart type icons
+export const BaselineChart = () => (
+  <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+    <path d="M1 8h14" stroke="currentColor" strokeWidth="1" strokeDasharray="2,2"/>
+    <path d="M2 8L5 5l3 4 4-2 2-1" stroke="currentColor" strokeWidth="2" fill="none"/>
+    <path d="M2 8L5 5l3 4 4-2 2-1V14H2V8z" fill="currentColor" fillOpacity="0.2"/>
+  </svg>
+);
+
+export const AreaChart = () => (
+  <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+    <path d="M2 12L6 8l3 3 5-5V14H2V12z" fill="currentColor" fillOpacity="0.3"/>
+    <path d="M2 12L6 8l3 3 5-5" stroke="currentColor" strokeWidth="2" fill="none"/>
+  </svg>
+);
+
+export const CandlestickChart = () => (
+  <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+    {/* Candlestick 1 */}
+    <rect x="2" y="6" width="2" height="4" fill="currentColor"/>
+    <line x1="3" y1="4" x2="3" y2="12" stroke="currentColor" strokeWidth="1"/>
+    
+    {/* Candlestick 2 */}
+    <rect x="6" y="8" width="2" height="3" fill="currentColor"/>
+    <line x1="7" y1="5" x2="7" y2="13" stroke="currentColor" strokeWidth="1"/>
+    
+    {/* Candlestick 3 */}
+    <rect x="10" y="5" width="2" height="5" fill="currentColor"/>
+    <line x1="11" y1="3" x2="11" y2="12" stroke="currentColor" strokeWidth="1"/>
+  </svg>
+);

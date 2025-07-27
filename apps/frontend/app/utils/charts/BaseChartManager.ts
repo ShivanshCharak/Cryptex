@@ -29,7 +29,7 @@ import {
         rightPriceScale: {
           visible: true,
           entireTextOnly: true,
-          borderVisible: false,z
+          borderVisible: false,
         },
         grid: {
           vertLines: { visible: false },

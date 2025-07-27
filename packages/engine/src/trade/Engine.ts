@@ -56,17 +56,6 @@ export class Engine {
           console.error("Create order error", error);
         }
       }
-    //   case "CANCEL_ORDER":
-        try {
-          const orderId = message.data.orderId;
-          const cancelMarket = message.data.market;
-          const cancelOrder = this.orderbooks.find(
-            (o) => o.ticker() === cancelMarket
-          );
-        } catch (error) {
-          console.error("Camcel_Order error", error);
-        }
-        break;
       case "GET_DEPTH":
         try {
           const market = message.data.market;
@@ -100,7 +89,7 @@ export class Engine {
     side: "buy" | "sell",
     userId: string
   ) {
-    const orderbook = this.orderbooks.find((o) => o.ticker() === market);
+    const orderbook = this.orderbooks.find((o) => o?.ticker() === market);
     const baseAsset = market.split("_")[0];
     const quoteAsset = market.split("_")[1];
 
@@ -155,7 +144,7 @@ export class Engine {
     price: number,
     fillAmount: number,
     side: "buy" | "sell",
-    filled?: number
+    filled: number
   ) {
     try {
       // Input validation
@@ -163,7 +152,7 @@ export class Engine {
         throw new Error("Invalid price or fill amount");
       }
 
-      const result = await redis.evaluateTransaction(OrderBuyScript, {
+      const result= await redis.evaluateTransaction(OrderBuyScript, {
         arguments: [
           orderId,
           buyerUserId,
@@ -173,14 +162,30 @@ export class Engine {
           side,
           filled?.toString(),
         ],
-      });      
+      }) as {
+  ok:string,
+  buyerUserId: string,
+    sellerUserId:string,
+  totalCost: string,
+  filled: string,
+  newfill: string,
+  price: string
+  }|{
+     err:string,
+    needed:string,
+    available:string
+  };      
       this.syncArraysWithRedisResult(result, orderId, price, side);
 
 
-      if (result?.err) {
-        throw new Error(JSON.stringify(result.err));
-      }
-      return result;
+     if ('err' in result) {
+  // result is of type: { err: string; needed: string; available: string; }
+  console.log('Error:', result.err);
+} else {
+  // result is of type: { ok: string; buyerUserId: string; ... }
+  console.log('Success:', result.ok);
+}
+return result
     } catch (error) {
       console.error("Trade initiation failed:", error);
       throw error;
@@ -375,7 +380,7 @@ export class Engine {
             [`${crypto.asset}_locked`]: "0",
             asset: crypto?.asset.toString(),
             userId: crypto?.userId.toString(),
-            accountId: crypto?.accountId?.toString(),
+            accountId: crypto?.accountId?.toString() as string,
           });
         })
       );
@@ -426,7 +431,6 @@ export class Engine {
         if (data.market === "SOL") {
           for (let order of this.orderbooks) {
             if (order?.baseAsset === data.market) {
-    
               if (data.side === "buy") {
                 order.bids.push({
                   price: Number(data.price),
@@ -442,7 +446,7 @@ export class Engine {
                   quantity: Number(data.quantity),
                   orderId: data.orderId,
                   filled: Number(data.filled),
-                  side: data.side,
+                  side: data.side==="buy"?"buy":"sell",
                   userId: data.userId,
                 });
               }

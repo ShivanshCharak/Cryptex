@@ -1,7 +1,7 @@
 import {Client} from 'pg'
 import {createClient} from 'redis'
 
-const pgClient = new Client({
+const pgClient:Client = new Client({
     user:"shivansh",
     password:"shamsher@54",
     database:"crypto",

@@ -1,4 +1,4 @@
-// packages/prisma/index.ts
+
 import {PrismaClient} from './prisma/generated/client'
 
 

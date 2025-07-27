@@ -8,7 +8,7 @@ const client = new Client({
     port: 5432,
 });
 
-async function initializeDB() {
+async function initializeDB():Promise<void> {
     await client.connect();
 
     // Drop views and table first

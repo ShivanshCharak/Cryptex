@@ -42,7 +42,7 @@ function generateHourData(hourStart: Date) {
   });
 }
 
-async function seedData() {
+async function seedData():Promise<void> {
   await client.connect();
   await client.query(`DELETE FROM sol_prices`);
 

@@ -1,6 +1,6 @@
 import { Client } from 'pg'; 
 
-const client = new Client({
+const client:Client = new Client({
     user:"shivansh",
     password:"shamsher@54",
     database:"crypto",

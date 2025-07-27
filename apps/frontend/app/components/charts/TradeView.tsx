@@ -68,7 +68,7 @@ useEffect(() => {
             },
           
         );
-        //@ts-ignore
+
         chartManagerRef.current = chartManager;
       }
     };
@@ -88,7 +88,7 @@ useEffect(() => {
         style={{
           position: "absolute",
           display: "none",
-          backgroundColor: "#1e1e2f",
+          backgroundColor: "green",
           padding: "10px 14px",
           borderRadius: "8px",
           boxShadow: "0 2px 8px rgba(0,0,0,0.3)",
