@@ -13,19 +13,23 @@ export function authMiddleware(req: Request, res: Response, next: NextFunction):
     res.status(401).json({ message: 'Unauthorized' })
     return
   }
-
+  
   const token = authHeader.split(' ')[1]
-
+  console.log(token)
+  
   if(!process.env.ACCESS_TOKEN_SECRET){
     res.status(500).json({message:"server config error"})
     return
   }
   try {
     
+    console.log("accesstoken")
     const payload = verify(token, process.env.ACCESS_TOKEN_SECRET) as JwtPayload & {userId:string,email:string}
+    console.log(payload)
     req.user=payload 
     next()
-  } catch {
+  } catch(error) {
+    console.log(error)
     res.status(401).json({ message: 'Invalid token' })
     return // ✅ Again, add return here
   }

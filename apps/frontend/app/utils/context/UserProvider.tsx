@@ -22,6 +22,8 @@ interface UserContextType {
   setUser: (user: User | null) => void;
   isAuth: boolean;
   setIsAuth: (auth: boolean) => void;
+  amount:number
+  setAmount:(amount:number)=> void
 }
 
 const UserContext = createContext<UserContextType>({
@@ -33,6 +35,11 @@ const UserContext = createContext<UserContextType>({
   setIsAuth: () => {
     throw new Error("setIsAuth called outside of UserProvider");
   },
+  amount:0,
+  setAmount:()=>{
+    throw new Error("Amount is called outisde Userprovider")
+  }
+
 });
 
 export const useUserAuth = () => useContext(UserContext);
@@ -40,6 +47,7 @@ export const useUserAuth = () => useContext(UserContext);
 export const UserProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isAuth, setIsAuth] = useState<boolean>(false);
+  const [amount, setAmount] = useState<number>(0)
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -68,7 +76,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   return (
-    <UserContext.Provider value={{ user, setUser, isAuth, setIsAuth }}>
+    <UserContext.Provider value={{ user, setUser, isAuth, setIsAuth,amount,setAmount }}>
       {children}
     </UserContext.Provider>
   );

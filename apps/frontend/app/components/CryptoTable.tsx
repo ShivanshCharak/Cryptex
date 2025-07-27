@@ -268,9 +268,7 @@ const TopBar = () => {
     },
     { label: "Show 10", icon: <ChevronDown size={16} />, onClick: () => {} },
   ];
-  {
-    console.log(showFilter);
-  }
+
 
   return (
     <div className="w-full flex flex-wrap items-center justify-between bg-gray-900 rounded-lg mb-4">

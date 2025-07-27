@@ -15,6 +15,7 @@ interface TokenPayload {
 
 export async function userSignUp(req: Request, res: Response): Promise<void> {
     const { username, password, email } = req.body;
+    
 
     if (!username || !password || !email) {
         res.status(400).json({ error: "All fields are required" });
@@ -22,8 +23,10 @@ export async function userSignUp(req: Request, res: Response): Promise<void> {
     }
 
     const validation = userSchema.safeParse({ username, password, email });
+    console.log(validation.error)
 
     if (!validation.success) {
+
         res.status(400).json({ 
             error: "Validation failed", 
             details: validation.error.errors 
@@ -75,7 +78,7 @@ export async function userSignUp(req: Request, res: Response): Promise<void> {
         const refreshToken = jwt.sign(tokenPayload, process.env.REFRESH_TOKEN_SECRET as string , { 
             expiresIn: "7d" 
         });
-
+        console.log(accessToken)
         
         res.cookie('refreshToken', refreshToken, {
             httpOnly: true,

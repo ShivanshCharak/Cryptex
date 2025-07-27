@@ -15,15 +15,27 @@ import { ChartLoading } from "./loading";
 import { AuthInspector } from "@/app/utils/AuthInspector";
 import TopToolbar from "@/app/components/TopToolbar";
 import { useRouter } from "next/navigation";
+import { useUserAuth } from "@/app/utils/context/UserProvider";
 
 
 export default function Page() {
+    const {setIsAuth} = useUserAuth()
     const { market } = useParams();
     const router = useRouter()
     const [token, setToken] = useState<string>("")
     const [range, setRange] = useState<"1D" | "1W" | "1M" | "1Y">("1D");
     const [chartType, setChartType] = useState<String>("barchart")
     const {depth} = useOrders()
+    useEffect(()=>{
+        if(AuthInspector.isAuthenticated()){
+            console.log("User authenticated")
+            setIsAuth(true)
+        }else{
+            console.log("Not authenticated")
+            router.push("/")
+            
+        }
+    },[])
     
 
 

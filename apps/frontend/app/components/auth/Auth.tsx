@@ -1,31 +1,25 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Eye, EyeOff, X, Lock, Mail, User, Loader2 } from "lucide-react";
-
+import { useUserAuth } from "@/app/utils/context/UserProvider";
+import { ToastContainer, toast } from "react-toastify";
+import zxcvbn from 'zxcvbn'
 type TUserInfo = {
   email: string;
   password: string;
   username: string;
 };
 
+
 type Props = {
   setShowAuth: (show: boolean) => void;
 };
 
-// Mock context hook
-const useUserAuth = () => ({
-  setUser: (user: any) => console.log('Setting user:', user),
-  user: null,
-  isAuth: false,
-  setIsAuth: (auth: boolean) => console.log('Setting auth:', auth)
-});
-
-const toast = {
-  success: (msg: string) => alert(`Success: ${msg}`),
-  error: (msg: string) => alert(`Error: ${msg}`)
-};
 
 export default function AuthModal({ setShowAuth = () => {} }: Partial<Props>) {
   const { setUser, setIsAuth } = useUserAuth();
+//   const result = zxcvbn("Tr0ub4dor&3");
+// console.log(result.score); // 0–4
+// console.log(result.feedback.suggestions); 
 
   const [showPassword, setShowPassword] = useState(false);
   const [userData, setUserData] = useState<TUserInfo>({
@@ -35,23 +29,53 @@ export default function AuthModal({ setShowAuth = () => {} }: Partial<Props>) {
   });
   const [authType, setAuthType] = useState<'Login' | 'Signup'>('Login');
   const [isLoading, setIsLoading] = useState(false);
-  const [errors, setErrors] = useState<Partial<TUserInfo>>({});
+   const [errors, setErrors] = useState<Partial<TUserInfo>>({});
+   const strengthRef  = useRef<HTMLSpanElement>(null)
+  const [passwordErrors, setPasswordErrors] = useState<string[]>([]);
+
+  
+  function validatePassword(password: string): string[] {
+    const errs: string[] = [];
+    if (password.length < 8) errs.push("At least 8 characters");
+    if (!/[A-Z]/.test(password)) errs.push("At least one uppercase letter");
+    if (!/[!@#$%^&*(),.?\":{}|<>]/.test(password)) errs.push("At least one special character");
+    return errs;
+  }
+
+  useEffect(() => {
+    setPasswordErrors(validatePassword(userData.password));
+  }, [userData.password]);
 
   const validateForm = () => {
     const newErrors: Partial<TUserInfo> = {};
     if (!userData.email) newErrors.email = "Email is required";
     else if (!/\S+@\S+\.\S+/.test(userData.email)) newErrors.email = "Invalid email format";
     if (!userData.password) newErrors.password = "Password is required";
-    else if (userData.password.length < 6) newErrors.password = "Password must be at least 6 characters";
+    else if (passwordErrors.length > 0) newErrors.password = "Password does not meet requirements";
     if (authType === 'Signup' && !userData.username) newErrors.username = "Username is required";
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
+  async function passwordStrength(){
+    const strength = zxcvbn(userData.password)    
+    console.log(strength.score)
+    if(!strengthRef.current){return }
+    const bars = strengthRef.current.children
+    for(let i =0;i<strengthRef.current.children.length;i++){
+      const bar  = bars[i] as HTMLElement
+      if(i<strength.score){
+          bar.style.backgroundColor='red'
+      }else{
+        bar.style.backgroundColor="white"
+      }
+    }
+  }
+
   async function handleSubmit() {
     if (!validateForm()) return;
     setIsLoading(true);
-    setErrors({});
 
     try {
       const res = await fetch(`http://localhost:3003/auth/${authType}`, {
@@ -73,24 +97,18 @@ export default function AuthModal({ setShowAuth = () => {} }: Partial<Props>) {
         });
         localStorage.setItem('cryptex-token', fetched.accessToken);
         setIsAuth(true);
+
         setShowAuth(false);
         toast.success(fetched.message);
       } else {
         toast.error(fetched.message || 'Authentication failed');
       }
-    } catch (error) {
+    } catch {
       toast.error('Network error. Please try again.');
     } finally {
       setIsLoading(false);
     }
   }
-
-  useEffect(() => {
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = "auto";
-    };
-  }, []);
 
   const inputClasses = (field: keyof TUserInfo) => `
     w-full bg-slate-800 border rounded-xl px-4 py-4 pl-12 text-white placeholder-slate-400
@@ -115,7 +133,9 @@ export default function AuthModal({ setShowAuth = () => {} }: Partial<Props>) {
                 <Lock className="text-white" size={26} />
               </div>
               <h1 className="text-3xl font-bold text-white mb-2">Cryptex</h1>
-              <p className="text-slate-400 text-sm">{authType === 'Login' ? 'Welcome back' : 'Create your account'}</p>
+              <p className="text-slate-400 text-sm">
+                {authType === 'Login' ? 'Welcome back' : 'Create your account'}
+              </p>
             </div>
 
             <div className="flex bg-slate-800 rounded-xl p-1.5 mb-6 border border-slate-700">
@@ -167,13 +187,14 @@ export default function AuthModal({ setShowAuth = () => {} }: Partial<Props>) {
                 {errors.email && <p className="text-red-400 text-sm">{errors.email}</p>}
               </div>
 
+
               <div>
                 <div className="relative">
                   <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                   <input
                     type={showPassword ? "text" : "password"}
                     value={userData.password}
-                    onChange={(e) => setUserData(prev => ({ ...prev, password: e.target.value }))}
+                    onChange={(e) => {setUserData(prev => ({ ...prev, password: e.target.value })),passwordStrength()}}
                     className={inputClasses('password')}
                     placeholder="Password"
                     disabled={isLoading}
@@ -186,13 +207,33 @@ export default function AuthModal({ setShowAuth = () => {} }: Partial<Props>) {
                     {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
                 </div>
-                {errors.password && <p className="text-red-400 text-sm">{errors.password}</p>}
+                <label htmlFor="" className="text-xs">Password Strength</label>
+                  <section ref={strengthRef} className="flex w-[70%] justify-between mt-3 ml-4">
+                    <div className="w-[20%] h-[5px] transition-colors"></div>
+                    <span className="w-[20%] h-[5px]  transition-color"></span>
+                    <span className="w-[20%] h-[5px]  transition-colors"></span>
+                    <span className="w-[20%] h-[5px]  transition-colors"></span>
+
+                    <span></span>
+                  </section>
+                {/* ✅ Show password validation messages */}
+                {passwordErrors.length > 0 && (
+                  <ul className="text-red-400 text-sm mt-1">
+                    {passwordErrors.map((err, idx) => (
+                      <li key={idx}>• {err}</li>
+                    ))}
+                  </ul>
+                )}
               </div>
 
               <button
                 type="submit"
-                disabled={isLoading}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-xl transition disabled:opacity-50"
+                disabled={isLoading || passwordErrors.length > 0}
+                className={`w-full font-semibold py-3 px-4 rounded-xl transition ${
+                  passwordErrors.length > 0 || isLoading
+                    ? "bg-gray-600 cursor-not-allowed"
+                    : "bg-blue-600 hover:bg-blue-700"
+                } text-white`}
               >
                 {isLoading ? (
                   <div className="flex justify-center items-center gap-2">
@@ -215,6 +256,8 @@ export default function AuthModal({ setShowAuth = () => {} }: Partial<Props>) {
           </div>
         </div>
       </div>
+
+      <ToastContainer />
     </div>
   );
 }

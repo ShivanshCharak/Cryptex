@@ -1,12 +1,23 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {toast} from 'react-toastify'
+import { useUserAuth } from "../utils/context/UserProvider";
+import { useRouter } from "next/navigation";
+import { AuthInspector } from "../utils/AuthInspector";
 
-import { useAmount } from "../utils/context/AmountContext";
 export default function DepositMoney() {
-  const [amountToDeposit, setAmountToDeposit] = useState("");
-  const {amount,setAmount} = useAmount()
-  
+  const {setIsAuth} = useUserAuth()
+  const [amountToDeposit, setAmountToDeposit] = useState<number|undefined>();
+  const router =  useRouter()
+  useEffect(()=>{
+    if(AuthInspector.isAuthenticated()){
+      setIsAuth(true)
+      console.log("user is authenticated")
+    }else{
+      router.push("/")
+    }
+  },[])
+  const {setAmount}  = useUserAuth()  
 
   const handleDeposit = async () => {
     try {
@@ -24,11 +35,17 @@ export default function DepositMoney() {
             body:JSON.stringify({amountToDeposit}),
             credentials:"include"
         })
+        if(res.ok){
+          console.log("YOOOOOOOOOOo")
+          const data = await res.json()
+          console.log("amoutn despo")
 
-        const data = await res.json()
-        toast.success(data.message)
-        console.log(data)
-        setAmount(data.account?.amount)
+            setAmount(data.account.amount)
+            console.log(data.message)
+          toast.success(data.message)
+          console.log(data)
+
+        }
     } catch (error) {
         console.log(error)
     }
@@ -44,7 +61,7 @@ export default function DepositMoney() {
           type="number"
           placeholder="Enter amount"
           value={amountToDeposit}
-          onChange={(e) => setAmountToDeposit(e.target.value)}
+          onChange={(e) => setAmountToDeposit(Number(e.target.value))}
           className="w-full px-4 py-2 bg-[#111215] text-white border border-gray-600 rounded-md placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500 mb-4"
         />
         

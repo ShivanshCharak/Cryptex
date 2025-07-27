@@ -2,8 +2,7 @@
 import CategoryMarket from "../components/CategoryMarket";
 import CryptoTable from "../components/CryptoTable";
 import MarketAltCard from "../components/MarketAltCard";
-import { JSX } from "react";
-import Column from "../utils/Column";
+
 import MarketCards from "../components/MarketCards";
 import { cryptoAssets, DexScan } from "../utils/DataPool";
 import MarketNews from "../components/MarketNews";
@@ -19,10 +18,11 @@ import {
   Community_Votes,
 } from "../utils/SVGPool";
 import { TcardConfig } from "../utils/types";
-import { TCryptoAssets } from "../utils/types";
+import { useUserAuth } from "../utils/context/UserProvider";
 
 export default function Market() {
   const router = useRouter();
+  const {setIsAuth} = useUserAuth()
   const cardConfigs: TcardConfig = [
     {
       type: "Trending Coins",
@@ -45,8 +45,10 @@ export default function Market() {
   ];
   useEffect(() => {
     if (AuthInspector.isAuthenticated()) {
-      console.log("user is authenticated");
+      setIsAuth(true)
+      console.log("User is authenticated")
     } else {
+      setIsAuth(false)
       router.push("/");
       console.log("User is not authenticated");
     }

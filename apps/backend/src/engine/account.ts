@@ -29,7 +29,7 @@ export  async function depositMoney(req: Request, res: Response):Promise<void> {
                 where: { email: req.user?.email },
                 select: { id: true }
             });
-
+            console.log("existisng user",existingUser,req.user)
             if (!existingUser) {
                 throw new Error("UserNotFound");
             }
@@ -37,14 +37,17 @@ export  async function depositMoney(req: Request, res: Response):Promise<void> {
             const existingAccount = await tx.accountBalance.findFirst({
                 where: { userId: existingUser.id }
             });
+            
 
             if (existingAccount) {
+                console.log("existing account",existingAccount)
                 return await tx.accountBalance.update({
                     where: { id: existingAccount.id },
                     data: { amount: { increment: Number(amountToDeposit) } },
                     select: { amount: true }
                 });
             } else {
+                console.log(existingUser.id,"existing users")
                 return await tx.accountBalance.create({
                     data: {
                         amount: Number(amountToDeposit),
@@ -54,6 +57,7 @@ export  async function depositMoney(req: Request, res: Response):Promise<void> {
                 });
             }
         });
+        console.log(accountUpdated)
 
         res.status(201).json({
             message: "Amount deposited successfully.",

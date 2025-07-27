@@ -1,22 +1,20 @@
 "use client";
-import { FaRobot, FaBullhorn, FaExternalLinkAlt } from "react-icons/fa";
+import { FaRobot, FaBullhorn, FaExternalLinkAlt,FaHashtag } from "react-icons/fa";
 import { MdOutlineWidgets, MdOutlineApi } from "react-icons/md";
 import { IoIosPaper, IoIosMail, IoMdRocket } from "react-icons/io";
 import { RiCalendarEventLine } from "react-icons/ri";
 import { BsFillBookFill, BsNewspaper } from "react-icons/bs";
 import { AiFillGift } from "react-icons/ai";
-import { PiVideoFill } from "react-icons/pi";
+import { PiVideoFill,PiArticleFill } from "react-icons/pi";
 import { BiSolidGraduation } from "react-icons/bi";
 import { BsRssFill } from "react-icons/bs";
-import { FaHashtag } from "react-icons/fa";
 import { FiActivity } from "react-icons/fi";
-import { PiArticleFill } from "react-icons/pi";
+
 
 import { MdSpeed } from "react-icons/md";
 
 import { usePathname } from "next/navigation";
 import Cryptex  from "../../public/cryptex.png"
-import Link from "next/link";
 import { useState, useEffect, useContext } from "react";
 import Image from "next/image";
 
@@ -25,9 +23,9 @@ import { useRouter } from "next/navigation";
 import { Burger, Search, Tag } from "../utils/SVGPool";
 import { Portfolio_svg, Watchlist } from "../utils/SVGPool";
 import MegaMenu from "../utils/MenuItems";
-import Signup from "./auth/Signup";
 import { useUserAuth } from "../utils/context/UserProvider";
 import { AuthInspector } from "../utils/AuthInspector";
+import AuthModal from "./auth/Auth";
 
 // Type definitions
 interface DropDownItem {
@@ -63,44 +61,15 @@ interface UserAuthContext {
   user: User | null;
 }
 
-export const Appbar: React.FC = () => {
+export function Appbar(){
   const route = usePathname();
   const router = useRouter();
   const [showDexScan, setShowDexScan] = useState<boolean>(false);
   const [showCommunity, setShowCommunity] = useState<boolean>(false);
   const [showProducts, setShowProducts] = useState<boolean>(false);
   const [showAuth, setShowAuth] = useState<boolean>(false);
-  const [showMarkets, setShowMarkets] = useState<boolean>(false);
-  const { user } = useUserAuth() as UserAuthContext;
-  const { isAuth, setIsAuth } = useUserAuth();
+  const { isAuth } = useUserAuth();
 
-  useEffect(() => {
-    const checkAuth = () => {
-      const token = localStorage.getItem("cryptex-token");
-      setIsAuth(!!token);
-    };
-
-    checkAuth();
-    window.addEventListener("storage", checkAuth);
-
-    return () => {
-      window.removeEventListener("storage", checkAuth);
-    };
-  }, []);
-
-  const handleSearchFocus = (): void => {
-    setShowMarkets(true);
-  };
-
-  const handleSearchBlur = (): void => {
-    setShowMarkets(false);
-  };
-
-  const handleMarketItemClick = (): void => {
-    if (route.startsWith("/markets")) {
-      router.push("/trade/SOL_USDC");
-    }
-  };
 
   return (
     <div className="text-white border-b border-slate-800 py-3 z-10 w-full">
@@ -167,6 +136,7 @@ export const Appbar: React.FC = () => {
         </span>
 
         <div className="flex justify-between ">
+          {console.log("isauth",isAuth)}
           {isAuth ? (
             <Button variant="Green" onClick={() => router.push("/deposit")}>
               Deposit
@@ -182,7 +152,7 @@ export const Appbar: React.FC = () => {
             </Button>
           )}
 
-          {showAuth && <Signup setShowAuth={setShowAuth} />}
+          {showAuth && <AuthModal setShowAuth={setShowAuth} />}
 
           <span
             className="relative cursor-pointer px-2 w-[70px] h-[35px] bg-[#323546] flex justify-between items-center rounded-lg"
@@ -195,7 +165,6 @@ export const Appbar: React.FC = () => {
               height={24}
             />
 
-          
           </span>
         </div>
       </div>
