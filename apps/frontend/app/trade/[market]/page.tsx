@@ -26,17 +26,6 @@ export default function Page() {
     const [range, setRange] = useState<"1D" | "1W" | "1M" | "1Y">("1D");
     const [chartType, setChartType] = useState<String>("barchart")
     const {depth} = useOrders()
-    useEffect(()=>{
-        if(AuthInspector.isAuthenticated()){
-            console.log("User authenticated")
-            setIsAuth(true)
-        }else{
-            console.log("Not authenticated")
-            router.push("/")
-            
-        }
-    },[])
-    
 
 
     return <div className="flex flex-row max:flex-col flex-1 over ">

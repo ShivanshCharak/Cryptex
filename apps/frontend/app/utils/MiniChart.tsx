@@ -6,7 +6,6 @@ import * as d3 from 'd3';
 
 const MiniD3Chart = ({ data, color = '#4caf50', width, height = 20 }) => {
   const chartRef = useRef(null);
-  console.log("MiniD3Chart",width)
 
   useEffect(() => {
     if (!data || data.length === 0) return;

@@ -1,14 +1,37 @@
-export class AuthInspector{
-    private constructor(){}
+'use client'
 
-    public static isAuthenticated(): boolean{
-        
-        const token = localStorage.getItem('cryptex-token')
-        console.log(token)
-        if(!token){
-            return false
-        } else{
-            return true
-        }
+import { toast } from "react-toastify";
+import { useUserAuth,User } from "./context/UserProvider";
+import { jwtDecode } from "jwt-decode";
+
+
+export class AuthInspector {
+  private constructor() {}
+
+  public static async isAuthenticated():Promise<boolean> {
+    const {setUser} = useUserAuth()
+    try {
+
+      const res = await fetch('http://localhost:3003/auth/me', {
+        credentials: 'include',
+        method:"GET"
+      });
+      if(res.ok){
+        const data = await res.json()
+        localStorage.setItem("cryptex-token",data.accessToken)
+        toast.success(data.message)
+        const user  = jwtDecode(data)
+        console.log(user)
+        setUser(user as User)
+
+        return true
+      }
+
+      return false
+    } catch (e) {
+      return false;
     }
+  }
 }
+
+

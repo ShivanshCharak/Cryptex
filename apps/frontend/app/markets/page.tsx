@@ -44,14 +44,18 @@ export default function Market() {
     },
   ];
   useEffect(() => {
-    if (AuthInspector.isAuthenticated()) {
-      setIsAuth(true)
-      console.log("User is authenticated")
-    } else {
-      setIsAuth(false)
-      router.push("/");
-      console.log("User is not authenticated");
+
+    async function Inspector(){
+      if (await AuthInspector.isAuthenticated()) {
+        setIsAuth(true)
+      } else {
+        setIsAuth(false)
+        router.push("/");
+        console.log("User is not authenticated");
+      }
     }
+  Inspector()
+  
   }, []);
   return (
     <div>

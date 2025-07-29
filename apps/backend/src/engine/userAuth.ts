@@ -182,12 +182,12 @@ export async function userSignIn(req: Request, res: Response): Promise<void> {
 
 export async function refreshToken(req: Request, res: Response): Promise<void> {
     const { refreshToken } = req.cookies;
-
+    
     if (!refreshToken) {
         res.status(401).json({ error: "Refresh token not found" });
         return;
     }
-
+    
     try {
         const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET as string) as TokenPayload;
         
@@ -195,17 +195,17 @@ export async function refreshToken(req: Request, res: Response): Promise<void> {
         const user = await prisma.user.findUnique({
             where: { id: decoded.userId },
         });
-
+        
         if (!user) {
             res.status(401).json({ error: "User not found" });
             return;
         }
-
+        
         const tokenPayload: TokenPayload = {
             userId: user.id,
             email: user.email
         };
-
+        
         
         const newAccessToken = jwt.sign(tokenPayload, process.env.ACCESS_TOKEN_SECRET as string, { 
             expiresIn: "15m" 

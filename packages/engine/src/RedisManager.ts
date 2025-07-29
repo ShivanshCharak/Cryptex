@@ -1,5 +1,5 @@
 import IORedis, { Redis, ScanStream } from "ioredis";
-import { Order } from "./utils/type";
+import { Order, OrderData } from "./utils/type";
 
 type DbMessage = {
     type: "TRADE_ADDED",
@@ -83,14 +83,15 @@ export class RedisManager {
 
         return result?.map(([error,data])=>{
             if(error) throw error;
+            let order = data as OrderData
             return{
-                market:data?.market,
-                side:data.side,
-                price:data.price,
-                quantity:data.quantity,
-                filled:data.filled,
-                orderId:data.orderId,
-                userId:data.userId
+                market:order?.market,
+                side:order.side,
+                price:order.price,
+                quantity:order.quantity,
+                filled:order.filled,
+                orderId:order.orderId,
+                userId:order.userId
             }
         })
         

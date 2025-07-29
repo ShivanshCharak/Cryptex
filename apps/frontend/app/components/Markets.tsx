@@ -21,12 +21,6 @@ export const Markets = () => {
     <div className="flex flex-col flex-1 max-w-[1280px] w-full">
       <div className="flex flex-col min-w-[700px] flex-1 w-full">
         <div className="flex flex-col w-full rounded-lg bg-baseBackgroundL1 px-5 py-3">
-          {/* <table className="w-full table-auto">
-            
-            <MarketHeader />
-            {tickers?.map((m) => <MarketRow market={m} />)}
-            
-          </table> */}
             <table className="min-w-full text-sm">
                   <thead className="">
                     <tr className="text-left border-b border-gray-700 text-gray-400">

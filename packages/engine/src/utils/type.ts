@@ -16,6 +16,16 @@ export interface Fill {
     side:"buy"|"sell";
     filled:number
 }
+export type OrderData = {
+  market: string;
+  side: string;
+  price: number;
+  quantity: number;
+  filled: number;
+  orderId: string;
+  userId: string;
+}
+
 
 
 type PriceQty = {

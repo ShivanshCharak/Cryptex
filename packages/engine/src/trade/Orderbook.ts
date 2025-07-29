@@ -153,6 +153,14 @@ export class Orderbook {
         }
         if(order.quantity>executedQty){
             this.asks.push({...order,filled:executedQty})
+            fills.push({
+                ...order,
+                filled:executedQty,
+                otherUserId:order.userId,
+                tradeId:this.lastTradeId++,
+                
+            })
+            console.log("fills",fills)
             console.log("Partially filled bids updated ", this.bids)
         }
         for (let i = 0; i < this.bids.length; i++) {

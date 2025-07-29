@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import prisma from "postgres-prisma";
 import jwt from 'jsonwebtoken';
 
+
 export interface UserToken {
     email: string;
     userId: string;
@@ -57,7 +58,10 @@ export  async function depositMoney(req: Request, res: Response):Promise<void> {
                 });
             }
         });
-        console.log(accountUpdated)
+        if(accountUpdated){
+        
+        }
+
 
         res.status(201).json({
             message: "Amount deposited successfully.",

@@ -9,6 +9,7 @@ import {
   
   export abstract class BaseChartManager<T extends string> {
     protected chart: IChartApi;
+    // @ts-ignore
     protected series: ISeriesApi<T>;
     protected container: HTMLDivElement;
   
@@ -16,7 +17,7 @@ import {
       container: HTMLDivElement,
       layout: { background: string; color: string },
       options?: Partial<ChartOptions>,
-      tooltip:HTMLDivElement
+      tooltip?:HTMLDivElement
     ) {
       this.container = container;
       
@@ -38,10 +39,11 @@ import {
         ...options,
       });
       
-      this.subscribeToCrossHairMove(tooltip)
+      this.subscribeToCrossHairMove(tooltip as HTMLDivElement)
       this.series = this.addSeries();
       
     }
+    // @ts-ignore
     protected abstract addSeries(): ISeriesApi<T>;
 
     private subscribeToCrossHairMove(tooltip: HTMLDivElement) {
@@ -58,11 +60,13 @@ import {
         const date = new Date(timestamp);
         const formattedDate = date.toLocaleDateString("en-US");
         const formattedTime = date.toLocaleTimeString("en-US");
-    
-        tooltip.innerHTML = `
-          <div>${formattedDate} <span style="float:right">${formattedTime}</span></div>
-          <div>Price: <b>$${data.value.toFixed(2)}</b></div>
-        `;
+        if('value' in data){
+          
+          tooltip.innerHTML = `
+            <div>${formattedDate} <span style="float:right">${formattedTime}</span></div>
+            <div>Price: <b>$${data.value.toFixed(2)}</b></div>
+          `;
+        }
     
         tooltip.style.display = "block";
         tooltip.style.left = `${param.point?.x ?? 0 + 20}px`;
@@ -72,6 +76,7 @@ import {
     
     public setData(data: { time: UTCTimestamp; value: number }[]) {
       const sorted = data.sort((a, b) => a.time - b.time);
+      // @ts-ignore
       this.series.setData(sorted);
       this.chart.timeScale().fitContent();
     }

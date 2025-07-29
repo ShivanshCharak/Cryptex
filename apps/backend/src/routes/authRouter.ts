@@ -1,5 +1,5 @@
 import { Router } from "express";
-import {userSignIn, userSignUp } from "../engine/userAuth";
+import {refreshToken, userSignIn, userSignUp } from "../engine/userAuth";
 
 
 const router = Router();
@@ -11,5 +11,6 @@ router.use((req, res, next) => {
 
 router.post("/signup", userSignUp);
 router.post("/login", userSignIn);
+router.get("/me", refreshToken);
 
 export default router;

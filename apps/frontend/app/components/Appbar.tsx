@@ -68,8 +68,22 @@ export function Appbar(){
   const [showCommunity, setShowCommunity] = useState<boolean>(false);
   const [showProducts, setShowProducts] = useState<boolean>(false);
   const [showAuth, setShowAuth] = useState<boolean>(false);
-  const { isAuth } = useUserAuth();
+  const {isAuth,setIsAuth} = useUserAuth()
+  useEffect(()=>{
 
+    async function Inspector(){
+     
+     if (await AuthInspector.isAuthenticated()) {
+       setIsAuth(true)
+       console.log("User is authenticated")
+     } else {
+       setIsAuth(false)
+       router.push("/");
+       console.log("User is not authenticated");
+     }
+   }
+ Inspector()
+  },[])
 
   return (
     <div className="text-white border-b border-slate-800 py-3 z-10 w-full">
@@ -136,7 +150,6 @@ export function Appbar(){
         </span>
 
         <div className="flex justify-between ">
-          {console.log("isauth",isAuth)}
           {isAuth ? (
             <Button variant="Green" onClick={() => router.push("/deposit")}>
               Deposit
