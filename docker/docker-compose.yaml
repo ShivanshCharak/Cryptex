@@ -1,9 +1,9 @@
-version: '3.8'
-
 services:
   timescaledb:
     image: timescale/timescaledb:latest-pg12
     container_name: timescaledb
+    networks:
+      - monitoring_net
     ports:
       - "5432:5432"
     environment:
@@ -12,15 +12,13 @@ services:
       POSTGRES_PASSWORD: shamsher@54
     volumes:
       - timescale-data:/var/lib/postgresql/data
-  redis:
-    image: redis:latest
-    container_name: redis
-    ports:
-      - "6379:6379"
+
   postgresdb:
     image: postgres
     container_name: postgresdb
-    ports: 
+    networks:
+      - monitoring_net
+    ports:
       - "5433:5432"
     environment:
       POSTGRES_DB: users
@@ -28,8 +26,49 @@ services:
       POSTGRES_PASSWORD: shamsher@54
     volumes:
       - postgres-data:/var/lib/postgresql/data
-  
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    networks:
+      - monitoring_net
+    ports:
+      - "6379:6379"
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3005:3000"
+    networks:
+      - monitoring_net
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+  loki:
+    image: grafana/loki:latest
+    ports:
+      - "3100:3100"
+    networks:
+      - monitoring_net
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    networks:
+      - monitoring_net
+    ports:
+      - "9090:9090"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - redis
+      - timescaledb
+      - postgresdb
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
 
 volumes:
   timescale-data:
   postgres-data:
+
+networks:
+  monitoring_net:
+    driver: bridge

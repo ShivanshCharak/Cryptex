@@ -36,7 +36,7 @@ export async function buyCrypto(req: Request, res: Response) {
             }
 
             const orders = await tx.orders.findMany({
-                where: { market: crypto, type: SELL },
+                where: { market: crypto, side: SELL },
                 orderBy: { price: 'asc' }
             });
 
@@ -89,7 +89,7 @@ export async function sellCrypto(req: Request, res: Response) {
             }
 
             const orders = await tx.orders.findMany({
-                where: { market: crypto, type: BUY },
+                where: { market: crypto, side: BUY },
                 orderBy: { price: 'desc' } // Highest price first
             });
 

@@ -8,7 +8,7 @@ import auth from './routes/authRouter';
 import moneyDeposit from './routes/moneyRouter'; 
 import cryptoDeposit from './routes/cryptoRouter';
 import orderDeposit from './routes/orderRouter'
-import {register,postgres_connection_status,timescaleDb_connection_status} from './Monitoring/metrics'
+import {register,postgres_connection_status,timescaleDb_connection_status, httpConnections} from './Monitoring/metrics'
 import { authMiddleware } from './middleware/authMiddleware';
 import { databaseConnections } from './premhelper';
 
@@ -40,12 +40,26 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
+
 app.on("connection",(socket)=>{
     incrementConnection()
     app.on("close",()=>{
         decrementConnection();
     })
 })
+
+let activeConnections= 0
+app.use((req,res,next)=>{
+  activeConnections+=1
+  httpConnections.set(activeConnections)
+  res.on("finish",()=>{
+    activeConnections-=1
+    httpConnections.set(activeConnections)
+  })
+  next()
+})
+
+
 
 app.use("/auth", auth);
 app.use("/account" ,authMiddleware ,moneyDeposit); // ← attaches /account/deposit

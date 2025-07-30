@@ -1,6 +1,15 @@
 import { BASE_CURRENCY,Order,Fill } from "../utils/type";
 import { redis } from "./Engine";
 
+
+// class PriceTree {
+//   set(price: number, orders: OrderQueue): void {}
+//   get(price: number): OrderQueue | undefined { return undefined }
+//   getMaxKey(): number | undefined { return undefined }
+//   getMinKey(): number | undefined { return undefined }
+//   delete(price: number): void {}
+// }
+
 export class Orderbook {
     bids: Order[];
     asks: Order[];

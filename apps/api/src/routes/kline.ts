@@ -1,6 +1,8 @@
 import { Client } from 'pg';
 import { Router } from "express";
 import { RedisManager } from "../RedisManager";
+import { httpTotalRequest } from 'backend/src/Monitoring/metrics';
+
 
 const pgClient = new Client({
     user: 'shivansh',
@@ -14,6 +16,10 @@ pgClient.connect();
 export const klineRouter = Router();
 
 klineRouter.get("/", async (req, res) => {
+      httpTotalRequest.inc({
+            method:"get",
+            routes:"api/v1/klines"
+        })
     const { market, interval, startTime, endTime } = req.query;
     console.log("startime",startTime,endTime,interval)
 

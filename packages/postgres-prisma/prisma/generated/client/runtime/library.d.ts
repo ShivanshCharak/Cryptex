@@ -1180,6 +1180,10 @@ declare type Error_2 = {
         foreignKey: {};
     };
 } | {
+    kind: 'DatabaseNotReachable';
+    host?: string;
+    port?: number;
+} | {
     kind: 'DatabaseDoesNotExist';
     db?: string;
 } | {
@@ -1188,6 +1192,11 @@ declare type Error_2 = {
 } | {
     kind: 'DatabaseAccessDenied';
     db?: string;
+} | {
+    kind: 'ConnectionClosed';
+} | {
+    kind: 'TlsConnectionError';
+    reason: string;
 } | {
     kind: 'AuthenticationFailed';
     user?: string;
@@ -2411,7 +2420,7 @@ export declare const objectEnumValues: {
     };
 };
 
-declare const officialPrismaAdapters: readonly ["@prisma/adapter-planetscale", "@prisma/adapter-neon", "@prisma/adapter-libsql", "@prisma/adapter-d1", "@prisma/adapter-pg", "@prisma/adapter-mssql"];
+declare const officialPrismaAdapters: readonly ["@prisma/adapter-planetscale", "@prisma/adapter-neon", "@prisma/adapter-libsql", "@prisma/adapter-better-sqlite3", "@prisma/adapter-d1", "@prisma/adapter-pg", "@prisma/adapter-mssql", "@prisma/adapter-mariadb"];
 
 export declare type Omission = Record<string, boolean | Skip>;
 
@@ -2729,6 +2738,7 @@ declare interface Queryable<Query, Result> extends AdapterInfo {
 declare type QueryCompiler = {
     compile(request: string): {};
     compileBatch(batchRequest: string): BatchResponse;
+    free(): void;
 };
 
 declare interface QueryCompilerConstructor {
@@ -2768,6 +2778,11 @@ declare interface QueryEngineConstructor {
 declare type QueryEngineInstance = {
     connect(headers: string, requestId: string): Promise<void>;
     disconnect(headers: string, requestId: string): Promise<void>;
+    /**
+     * Frees any resources allocated by the engine's WASM instance. This method is automatically created by WASM bindgen.
+     * Noop for other engines.
+     */
+    free?(): void;
     /**
      * @param requestStr JSON.stringified `QueryEngineRequest | QueryEngineBatchRequest`
      * @param headersStr JSON.stringified `QueryEngineRequestHeaders`
@@ -3072,6 +3087,7 @@ declare type SchemaArg = ReadonlyDeep_2<{
     isNullable: boolean;
     isRequired: boolean;
     inputTypes: InputTypeRef[];
+    requiresOtherFields?: string[];
     deprecation?: Deprecation;
 }>;
 

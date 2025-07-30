@@ -3,6 +3,7 @@ import {
 
   OrderBuyScript,
 } from "../utils/luaScript";
+import {logger} from '../logger/logger'
 import { Orderbook } from "./Orderbook";
 import { Order, Fill } from "../utils/type";
 import fs from "fs";
@@ -32,7 +33,7 @@ export class Engine {
     }
   }
 
-  async process({ message, clientId }: { message: any; clientId: string }) {
+  async process({ message, clientId }: { message: {type:string, data:{market:string,price:number,quantity:number,side:"buy"|"sell",userId:string,}}; clientId: string }) {
     console.log(message,clientId)
     switch (message.type) {
       case "CREATE_ORDER": {
@@ -52,7 +53,9 @@ export class Engine {
               fills,
             },
           });
+          logger.info(`Order created for the ${message.data.userId} side: ${message.data.side} quantity:${message.data.quantity}`)
         } catch (error) {
+          logger.error(`Error during create order ${error}`)
           console.error("Create order error", error);
         }
       }
@@ -69,7 +72,9 @@ export class Engine {
             type: "DEPTH",
             payload: { bids: orderbook.bids, asks: orderbook.asks },
           });
+          logger.info(`Sent deth succesfully for the userId ${message.data.userId}`)
         } catch (e) {
+          logger.warn(`No depth found for ${message.data.userId}`)
           RedisManager.getInstance().sendToApi(clientId, {
             type: "DEPTH",
             payload: {
@@ -111,10 +116,11 @@ export class Engine {
     };
 
     const { fills, executedQty } = await orderbook.addOrder(order);
+    logger.info(`Added order ${fills} and quantity ${executedQty}`)
     await Promise.all(
       fills.map((fill) =>{
 
-       return  this.InitiateRedisTrades(
+       return this.InitiateRedisTrades(
           fill.orderId,
           userId,
           fill.otherUserId,
@@ -149,6 +155,7 @@ export class Engine {
     try {
       // Input validation
       if (isNaN(price) || isNaN(fillAmount)) {
+        logger.error(`Invalid price and amount for ${orderId} or ${buyerUserId} While sending it to redis`)
         throw new Error("Invalid price or fill amount");
       }
 
@@ -180,13 +187,16 @@ export class Engine {
 
      if ('err' in result) {
   // result is of type: { err: string; needed: string; available: string; }
+  logger.error(`redis transaction failed for ${orderId} ${buyerUserId}`,result.err)
   console.log('Error:', result.err);
 } else {
+  logger.info(`Redis transaction completed succesfully for ${orderId} ${buyerUserId}`)
   // result is of type: { ok: string; buyerUserId: string; ... }
   console.log('Success:', result.ok);
 }
 return result
     } catch (error) {
+      logger.error(`Trade initiation failed: ${error}`)
       console.error("Trade initiation failed:", error);
       throw error;
     }
@@ -199,7 +209,7 @@ return result
     side: "buy" | "sell"
   ) {
     const orderbook = this.orderbooks[0];
-    if (!orderbook) return;
+    if (!orderbook){ logger.warn(`No orderbookfound while executing orderId ${orderId}` ); return;}
 
     if (result.ok === "ORDER_COMPLETE") {
       if (side === "buy") {
@@ -213,6 +223,7 @@ return result
       }
     
     } else if (result.ok === "PARTIAL_FILL") {
+      logger.info(`PARTIALLY FILLED ${orderId}`)
       const orderArray = side === "buy" ? orderbook.bids : orderbook.asks;
       const orderIndex = orderArray.findIndex(
         (order) => order.orderId === orderId
@@ -231,6 +242,7 @@ return result
   }
 
   createDbTrades(fills: Fill[], market: string, userId: string) {
+    logger.info("Databse trades started")
     fills.forEach((fill) => {
       RedisManager.getInstance().pushMessage({
         type: "TRADE_ADDED",
@@ -253,6 +265,7 @@ return result
     fills: Fill[],
     market: string
   ) {
+    logger.info("DB trades initiated")
     RedisManager.getInstance().pushMessage({
       type: "ORDER_UPDATE",
       data: {
@@ -282,7 +295,7 @@ return result
         data: {
           e: "trade",
           t: fill.tradeId,
-          m: fill.otherUserId === userId, // TODO: Is this right?
+          m: fill.otherUserId === userId, 
           p: fill.price,
           q: fill.quantity.toString(),
           s: market,

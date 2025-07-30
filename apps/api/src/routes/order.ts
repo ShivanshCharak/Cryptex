@@ -1,14 +1,21 @@
 import { Router } from "express";
 import { RedisManager } from "../RedisManager";
 import { CREATE_ORDER, CANCEL_ORDER, ON_RAMP, GET_OPEN_ORDERS } from "../types";
+import {httpSuccessfullRequest, httpTotalRequest} from 'backend/src/Monitoring/metrics'
+
+
 
 export const orderRouter = Router();
 
 orderRouter.post("/", async (req, res) => {
+    httpTotalRequest.inc({
+        method:"post",
+        routes:"api/v1/order"
+    })
     const { market, price, quantity, side, userId } = req.body;
-    // console.log(req.body)
+
     console.log("order",userId)
-    //TODO: can u make the type of the response object right? Right now it is a union.
+
     const response = await RedisManager.getInstance().sendAndAwait({
         type: CREATE_ORDER,
         data: {
@@ -19,10 +26,21 @@ orderRouter.post("/", async (req, res) => {
             userId
         }
     });
+    httpSuccessfullRequest.inc({
+        method:"/post",
+        routes:"/api/v1/order",
+        message:"Order created and sent to the frontend"
+    })
+
+
     res.json(response.payload);
 });
 
 orderRouter.delete("/", async (req, res) => {
+      httpTotalRequest.inc({
+        method:"delete",
+        routes:"api/v1/order"
+    })
     const { orderId, market } = req.body;
     const response = await RedisManager.getInstance().sendAndAwait({
         type: CANCEL_ORDER,
@@ -31,10 +49,15 @@ orderRouter.delete("/", async (req, res) => {
             market
         }
     });
+    
     res.json(response.payload);
 });
 
 orderRouter.get("/open", async (req, res) => {
+      httpTotalRequest.inc({
+        method:"get",
+        routes:"api/v1/order"
+    })
     const response = await RedisManager.getInstance().sendAndAwait({
         type: GET_OPEN_ORDERS,
         data: {

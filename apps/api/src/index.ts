@@ -5,10 +5,13 @@ import { depthRouter } from "./routes/depth";
 import { tradesRouter } from "./routes/trades";
 import { klineRouter } from "./routes/kline";
 import { tickersRouter } from "./routes/ticker";
+import { httpTotalRequest } from "backend/src/Monitoring/metrics";
 
 export const app = express();
 app.use(cors());
 app.use(express.json());
+
+
 
 app.use("/api/v1/order", orderRouter);
 app.use("/api/v1/depth", depthRouter);

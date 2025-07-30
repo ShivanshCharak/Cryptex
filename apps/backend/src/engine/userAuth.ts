@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 import prisma from "postgres-prisma";
 import { userLoginSchema, userSchema } from "../zodvalidator";
 import dotenv from 'dotenv'
+import { httpTotalRequest,errorTotal, httpSuccessfullRequest } from "../Monitoring/metrics";
 dotenv.config()
 
 const SALT_ROUNDS = 10;
@@ -14,19 +15,26 @@ interface TokenPayload {
 }
 
 export async function userSignUp(req: Request, res: Response): Promise<void> {
+    httpTotalRequest.inc({
+        routes:"/auth/signup"
+    })
+
     const { username, password, email } = req.body;
     
-
     if (!username || !password || !email) {
+        errorTotal.inc({status_code:400,error:"All fields are required",routes:"/auth/signup"})
         res.status(400).json({ error: "All fields are required" });
         return;
     }
 
     const validation = userSchema.safeParse({ username, password, email });
-    console.log(validation.error)
 
     if (!validation.success) {
-
+        errorTotal.inc({
+            status_code:"400",
+            error:"Validation failed",
+            routes:"/auth/signup"
+        })
         res.status(400).json({ 
             error: "Validation failed", 
             details: validation.error.errors 
@@ -35,7 +43,6 @@ export async function userSignUp(req: Request, res: Response): Promise<void> {
     }
 
     try {
-        
         const existingUser = await prisma.user.findUnique({
             where: { username },
         });
@@ -70,7 +77,6 @@ export async function userSignUp(req: Request, res: Response): Promise<void> {
             email: user.email
         };
 
-        
         const accessToken = jwt.sign(tokenPayload, process.env.ACCESS_TOKEN_SECRET as string, { 
             expiresIn: "15m" 
         });
@@ -78,7 +84,6 @@ export async function userSignUp(req: Request, res: Response): Promise<void> {
         const refreshToken = jwt.sign(tokenPayload, process.env.REFRESH_TOKEN_SECRET as string , { 
             expiresIn: "7d" 
         });
-        console.log(accessToken)
         
         res.cookie('refreshToken', refreshToken, {
             httpOnly: true,
@@ -86,6 +91,12 @@ export async function userSignUp(req: Request, res: Response): Promise<void> {
             sameSite: 'strict',
             maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
         });
+
+        httpSuccessfullRequest.inc({
+            method:"201",
+            routes:"/auth/signup",
+            message:"User created successfulyl"
+        })
 
         res.status(201).json({
             message: "User created successfully",
@@ -100,10 +111,20 @@ export async function userSignUp(req: Request, res: Response): Promise<void> {
     } catch (error: any) {
         console.error("Signup error:", error);
         if (error.code === "P2002") {
+            errorTotal.inc({
+                 status_code:"409",
+                error: `Unique constraint failed on: ${error.meta?.target?.join(", ")}` ,
+                routes:"/auth/signup"
+            })
             res.status(409).json({ 
                 error: `Unique constraint failed on: ${error.meta?.target?.join(", ")}` 
             });
         } else {
+              errorTotal.inc({
+                 status_code:"500",
+                error: `Internal server error` ,
+                routes:"/auth/signup"
+            })
             res.status(500).json({ error: "Internal server error" });
         }
     }
@@ -111,8 +132,15 @@ export async function userSignUp(req: Request, res: Response): Promise<void> {
 
 export async function userSignIn(req: Request, res: Response): Promise<void> {
     const { password, email } = req.body;
-    console.log(password,email)
+    httpTotalRequest.inc({
+        routes:"/auth/signin"
+    })
     if (!password || !email) {
+             errorTotal.inc({
+            status_code:"400",
+            error:`Email and password is required`,
+            routes:"/auth/refreshToken"
+        })
         res.status(400).json({ error: "Email and password are required" });
         return;
     }
@@ -120,6 +148,11 @@ export async function userSignIn(req: Request, res: Response): Promise<void> {
     const validation = userLoginSchema.safeParse({ password, email });
 
     if (!validation.success) {
+             errorTotal.inc({
+            status_code:"400",
+            error:`Validation failed`,
+            routes:"/auth/signin"
+        })
         res.status(400).json({ 
             error: "Validation failed", 
             details: validation.error.errors 
@@ -133,6 +166,11 @@ export async function userSignIn(req: Request, res: Response): Promise<void> {
         });
 
         if (!user) {
+                 errorTotal.inc({
+            status_code:"401",
+            error:`Invalid creds`,
+            routes:"/auth/signin"
+        })
             res.status(401).json({ error: "Invalid credentials" });
             return;
         }
@@ -163,6 +201,11 @@ export async function userSignIn(req: Request, res: Response): Promise<void> {
             sameSite: 'strict',
             maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
         });
+               httpSuccessfullRequest.inc({
+            method:"200",
+            routes:"/auth/signin",
+            message:"Succesfully loggedin"
+        })
 
         res.status(200).json({
             message: `Welcome back ${user.username}`,
@@ -175,6 +218,12 @@ export async function userSignIn(req: Request, res: Response): Promise<void> {
         });
 
     } catch (error) {
+             errorTotal.inc({
+            status_code:"500",
+            error:`Sign-in error: ${error}`,
+            routes:"/auth/signin"
+        })
+        
         console.error("Sign-in error:", error);
         res.status(500).json({ error: "Internal server error" });
     }
@@ -184,6 +233,11 @@ export async function refreshToken(req: Request, res: Response): Promise<void> {
     const { refreshToken } = req.cookies;
     
     if (!refreshToken) {
+             errorTotal.inc({
+            status_code:"401",
+            error:`Refresh token not found`,
+            routes:"/auth/refreshToken"
+        })
         res.status(401).json({ error: "Refresh token not found" });
         return;
     }
@@ -197,6 +251,11 @@ export async function refreshToken(req: Request, res: Response): Promise<void> {
         });
         
         if (!user) {
+                 errorTotal.inc({
+            status_code:"401",
+            error:`User not found`,
+            routes:"/auth/refreshToken"
+        })
             res.status(401).json({ error: "User not found" });
             return;
         }
@@ -210,19 +269,36 @@ export async function refreshToken(req: Request, res: Response): Promise<void> {
         const newAccessToken = jwt.sign(tokenPayload, process.env.ACCESS_TOKEN_SECRET as string, { 
             expiresIn: "15m" 
         });
-
+           httpSuccessfullRequest.inc({
+            method:"200",
+            routes:"/auth/refreshToken",
+            message:"Token created succesfully"
+        })
         res.status(200).json({
             accessToken: newAccessToken,
             message: "Token refreshed successfully"
         });
 
     } catch (error) {
+           errorTotal.inc({
+            status_code:"401",
+            error:`Token refresh error,${error}`,
+            routes:"/auth/refreshToken"
+        })
         console.error("Token refresh error:", error);
         res.status(401).json({ error: "Invalid refresh token" });
     }
 }
 
 export async function logout(req: Request, res: Response): Promise<void> {
+    httpTotalRequest.inc({
+        routes:"/auth/logout"
+    })
     res.clearCookie('refreshToken');
+     httpSuccessfullRequest.inc({
+            method:"200",
+            routes:"/auth/logout",
+            message:"Logged out successfully"
+        })
     res.status(200).json({ message: "Logged out successfully" });
 }
