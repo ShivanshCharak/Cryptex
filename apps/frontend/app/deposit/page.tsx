@@ -20,21 +20,24 @@ export default function DepositMoney() {
   const {setAmount}  = useUserAuth()  
 
   const handleDeposit = async () => {
+
     try {
       console.log(localStorage.getItem('cryptex-token'))
+      console.log(amountToDeposit)
         if (!amountToDeposit || isNaN(Number(amountToDeposit))) {
           
           return;
         }
         const res  = await fetch("http://localhost:3003/account/deposit",{
-            method:"POST",
-            headers:{
-              'content-type':"application/json",
-              'authorization':`Bearer ${localStorage.getItem('cryptex-token')}`
-            },
-            body:JSON.stringify({amountToDeposit}),
-            credentials:"include"
+          method:"POST",
+          headers:{
+            'content-type':"application/json",
+            'authorization':`Bearer ${localStorage.getItem('cryptex-token')}`
+          },
+          body:JSON.stringify({amountToDeposit}),
+          credentials:"include"
         })
+        console.log("yo",amountToDeposit)
         if(res.ok){
           console.log("YOOOOOOOOOOo")
           const data = await res.json()

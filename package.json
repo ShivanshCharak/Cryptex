@@ -11,7 +11,7 @@
   "devDependencies": {
     "@types/opossum": "^8.1.9",
     "prettier": "^3.5.3",
-    "turbo": "^2.5.4",
+    "turbo": "^2.5.5",
     "typescript": "5.8.2"
   },
   "engines": {
@@ -25,6 +25,7 @@
   "dependencies": {
     "@prisma/client": "^6.9.0",
     "@swc/helpers": "^0.5.17",
+    "client-only": "^0.0.1",
     "opossum": "^9.0.0",
     "react-toastify": "^11.0.5"
   }

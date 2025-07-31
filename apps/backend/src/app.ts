@@ -1,16 +1,20 @@
 // src/app.ts
+import {v4 as uuidv4} from 'uuid'
+import { Request,Response,NextFunction } from 'express'
+import { httpTotalRequest,httpRequestDurationSeconds } from './Monitoring/metrics'
 import express,{Express, RequestHandler} from 'express';
 import dotenv from 'dotenv';
 import prisma from 'postgres-prisma'
 import cors from 'cors'
+
 import auth from './routes/authRouter';
 
 import moneyDeposit from './routes/moneyRouter'; 
 import cryptoDeposit from './routes/cryptoRouter';
 import orderDeposit from './routes/orderRouter'
-import {register,postgres_connection_status,timescaleDb_connection_status, httpConnections} from './Monitoring/metrics'
+import { httpConnections} from './Monitoring/metrics'
 import { authMiddleware } from './middleware/authMiddleware';
-import { databaseConnections } from './premhelper';
+// import {  } from './premhelper';
 
 import { metricsRouter } from './Monitoring/metricsRoute';
 import {healthRouter} from './Monitoring/healthRouter'
@@ -31,6 +35,35 @@ prisma.$connect()
 app.use(cookieParser())
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use((req:Request,res:Response,next:NextFunction)=>{
+  const startTime = performance.now()
+  req.traceId = req.headers['x-trace-id'] as string || uuidv4()
+  req.startTime  = startTime
+
+   
+  res.setHeader('X-Trace-ID', req.traceId);
+
+  res.on('finish',()=>{
+
+    const duration = performance.now()-startTime
+    console.log(duration)
+    const route:string = req.route?.path||req.path
+    console.log(route)
+    // @ts-ignore
+    httpTotalRequest.inc({
+        method:req.method,
+        routes:route,
+    })
+    
+    
+    httpRequestDurationSeconds.observe({
+      method:req.method ,
+      route: route,
+    },duration/1000)
+    
+  })
+  next()
+})
 
 
 app.use(cors({
@@ -61,7 +94,7 @@ app.use((req,res,next)=>{
 
 
 
-app.use("/auth", auth);
+app.use("/auth" ,auth);
 app.use("/account" ,authMiddleware ,moneyDeposit); // ← attaches /account/deposit
 app.use("/crypto",authMiddleware ,cryptoDeposit);
 app.use("/order",authMiddleware ,orderDeposit);

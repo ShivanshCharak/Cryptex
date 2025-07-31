@@ -1,20 +1,22 @@
 import { Router } from "express";
 import { RedisManager } from "../RedisManager";
 import { CREATE_ORDER, CANCEL_ORDER, ON_RAMP, GET_OPEN_ORDERS } from "../types";
-import {httpSuccessfullRequest, httpTotalRequest} from 'backend/src/Monitoring/metrics'
+import {httpSuccessfullRequest, httpTotalRequest} from '@repo/backend/metrics'
 
 
 
 export const orderRouter = Router();
 
 orderRouter.post("/", async (req, res) => {
+    console.log("hey")
     httpTotalRequest.inc({
         method:"post",
         routes:"api/v1/order"
     })
     const { market, price, quantity, side, userId } = req.body;
 
-    console.log("order",userId)
+
+    
 
     const response = await RedisManager.getInstance().sendAndAwait({
         type: CREATE_ORDER,

@@ -1,7 +1,7 @@
 import {Router} from 'express'
 import { RedisManager } from '../RedisManager'
 import {GET_DEPTH} from '../types/index'
-import { httpTotalRequest, httpSuccessfullRequest } from 'backend/src/Monitoring/metrics'
+import { httpTotalRequest, httpSuccessfullRequest } from '@repo/backend/metrics'
 
 
 export const depthRouter = Router()

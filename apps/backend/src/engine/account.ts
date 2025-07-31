@@ -13,14 +13,15 @@ export interface UserToken {
 }
 
 export  async function depositMoney(req: Request, res: Response):Promise<void> {
+    console.log("deposit money")
      httpTotalRequest.inc({
             routes:"/account/deposit"
         })
     try {
+        console.log(errorTotal)
         const { amountToDeposit } = req.body;
-
         if (amountToDeposit === undefined) {
-            errorTotal.inc({status_code:400,error:"Amount is required",routes:"/account/deposit"})
+            errorTotal.inc({status_code:"400",error:"Amount is required",routes:"/account/deposit"})
             res.status(400).json({ error: " amount is required." });
             return
         }

@@ -3,7 +3,7 @@ import {Request, Response, NextFunction} from 'express'
 
 collectDefaultMetrics({register})
 
-const httpRequestDurationSeconds = new Histogram({
+export const httpRequestDurationSeconds = new Histogram({
     name:"http_request_duration_seconds",
     help:"Duration og HTTP request in seconds",
     labelNames:["method","route","status_code"],

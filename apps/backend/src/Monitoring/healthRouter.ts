@@ -1,4 +1,4 @@
-import { activeConnections, buisnessMetrics, register } from './metrics'
+import { buisnessMetrics,  } from './metrics'
 import{ Router }from 'express'
 import { Request, Response, NextFunction } from 'express'
 import prisma from 'postgres-prisma'
@@ -22,7 +22,7 @@ setInterval(async ()=>{
     try {
         const info = await redis.info("clients");
         const match = info.match('/connected_clients:(\d+)/')
-        redisConnectedClients = match?parseInt(match[1],10):0
+        redisConnectedClients = match?parseInt(match[1] as string,10):0
     } catch (error) {
         redisConnectedClients=0
     }

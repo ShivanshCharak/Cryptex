@@ -129,7 +129,7 @@ export async function sellCrypto(req: Request, res: Response) {
         return res.status(500).json({ message: "Sell trade failed. Please try again." });
     }
 }
-
+// @ts-ignore
 async function getUserAccount(tx, userId: string) {
 
     const account = await tx.accountBalance.findUnique({

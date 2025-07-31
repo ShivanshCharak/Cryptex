@@ -78,7 +78,8 @@ export async function BulkCreateOrder(req: Request, res: Response) {
   try {
     await prisma.$transaction(async (tx) => {
       await tx.orders.createMany({
-        data: orders,
+        // @ts-ignore
+        data: orders ,
         skipDuplicates:true
       });
     });

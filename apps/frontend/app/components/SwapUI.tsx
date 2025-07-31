@@ -91,6 +91,7 @@ export function SwapUI({ market }: { market: string }) {
 
       const res = await fetch("http://localhost:3000/api/v1/order", {
         method: "POST",
+        credentials:"include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(order),
       });

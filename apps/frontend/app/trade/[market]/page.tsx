@@ -18,6 +18,7 @@ import { useRouter } from "next/navigation";
 import { useUserAuth } from "@/app/utils/context/UserProvider";
 
 
+
 export default function Page() {
     const {setIsAuth} = useUserAuth()
     const { market } = useParams();
@@ -26,6 +27,16 @@ export default function Page() {
     const [range, setRange] = useState<"1D" | "1W" | "1M" | "1Y">("1D");
     const [chartType, setChartType] = useState<String>("barchart")
     const {depth} = useOrders()
+
+    
+     useEffect(()=>{
+    if(AuthInspector.isAuthenticated()){
+      setIsAuth(true)
+      console.log("user is authenticated")
+    }else{
+      router.push("/")
+    }
+  },[])
 
 
     return <div className="flex flex-row max:flex-col flex-1 over ">

@@ -1,36 +1,42 @@
-import { verify } from 'jsonwebtoken'
+import { verify, JwtPayload } from 'jsonwebtoken'
 import { Request, Response, NextFunction } from 'express'
-import { JwtPayload } from 'jsonwebtoken'
 import dotenv from 'dotenv'
 
-export function authMiddleware(req: Request, res: Response, next: NextFunction): void {
+// Load environment variables only once at the top-level (not inside middleware)
+dotenv.config()
+
+// Extend Express Request interface to add `user`
+declare module 'express-serve-static-core' {
+  interface Request {
+    user?: {email:string} | JwtPayload
+  }
+}
+
+export function authMiddleware(req: Request, res: Response, next: NextFunction) {
   const authHeader = req.headers.authorization
 
-  dotenv.config()
-  
+  if (!authHeader?.startsWith('Bearer ')) {
+    return res.status(401).json({ message: 'Unauthorized' })
+  }
 
-  if (!authHeader?.startsWith('Bearer')) {
-    res.status(401).json({ message: 'Unauthorized' })
-    return
-  }
-  
   const token = authHeader.split(' ')[1]
-  console.log(token)
-  
-  if(!process.env.ACCESS_TOKEN_SECRET){
-    res.status(500).json({message:"server config error"})
-    return
+
+  const secret = process.env.ACCESS_TOKEN_SECRET
+  if (!secret) {
+    return res.status(500).json({ message: 'Server config error' })
   }
+
   try {
-    
-    console.log("accesstoken")
-    const payload = verify(token, process.env.ACCESS_TOKEN_SECRET) as JwtPayload & {userId:string,email:string}
+    console.log("Access token received")
+
+    const payload = verify(token as string, secret) as JwtPayload
     console.log(payload)
-    req.user=payload 
+
+    req.user = payload
+    console.log(req.user)
     next()
-  } catch(error) {
-    console.log(error)
-    res.status(401).json({ message: 'Invalid token' })
-    return 
+  } catch (error) {
+    console.error(error)
+    return res.status(401).json({ message: 'Invalid token' })
   }
 }
