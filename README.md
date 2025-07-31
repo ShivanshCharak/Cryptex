@@ -1,6 +1,10 @@
 # Cryptex
 
  it is a real-time crypto trading engine built using Redis, WebSockets, and a microservices-based API style, its is well monitored logged and oberved using Loki, Promethues, Grafana
+  real-time crypto trading engine built using Redis, WebSockets, and a microservices-based API system
+
+  ![image](https://github.com/user-attachments/assets/89c31bec-f49c-409a-974e-59bf87861381)
+
 ### 🧑‍💻 User Flow
 
 1. **Browser → API (`/api/v1/order`)**:
