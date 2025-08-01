@@ -40,14 +40,16 @@ export class SignalingManager {
             console.log("message received")
 
             if (this.callbacks[type]) {
+                // @ts-ignore
                 this.callbacks[type].forEach(({ callback }) => {
                     if (type === "ticker") {
-                        
+                        // @ts-ignore
                         const newTicker: Partial<Ticker> = {
                             lastPrice: message.data.c,
                             high: message.data.h,
                             low: message.data.l,
                             volume: message.data.v,
+                            // @ts-ignore
                             quoteVolume: message.data.V,
                             symbol: message.data.s,
                         }
@@ -97,6 +99,7 @@ export class SignalingManager {
 
     async deRegisterCallback(type: string, id: string) {
         if (this.callbacks[type]) {
+            // @ts-ignore
             const index = this.callbacks[type].findIndex(callback => callback.id === id);
             if (index !== -1) {
                 this.callbacks[type].splice(index, 1);

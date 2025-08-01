@@ -37,6 +37,7 @@ export class AreaChartManager {
     });
 
     this.areaSeries = this.chart.addAreaSeries({
+      // @ts-ignore
       baseValue: { type: 'price', price: 25 },
       topLineColor: 'rgba( 38, 166, 154, 1)',
       topFillColor1: 'rgba( 38, 166, 154, 0.28)',

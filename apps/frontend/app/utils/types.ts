@@ -1,4 +1,4 @@
-import { TTradeInfo } from "../components/depth/type";
+
 import { JSX } from "react";
 export interface KLine {
     close: string;
@@ -21,10 +21,9 @@ export interface Trade {
     timestamp: string
 }
 
-export interface Depth {
+export interface TDepth {
     bids: TTradeInfo[],
     asks: TTradeInfo[],
-    lastUpdateId: string
 }
 
 export interface Ticker {
@@ -38,7 +37,7 @@ export interface Ticker {
     priceChangePercent:number
 }
 
-export type TDepthBids={
+export type Depth={
     price: string
     quantity: string
 }
@@ -110,3 +109,14 @@ export type TDexScan=Array<{
             changePercent?: string,
           isPositive: boolean,
 }>
+
+export type TTradeInfo = {
+    filled: number,
+    market:string,
+    orderId:string,
+    price:number,
+    quantity:number,
+    side:string,
+    userId:string,
+}
+

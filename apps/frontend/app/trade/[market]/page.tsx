@@ -30,12 +30,16 @@ export default function Page() {
 
     
      useEffect(()=>{
-    if(AuthInspector.isAuthenticated()){
-      setIsAuth(true)
-      console.log("user is authenticated")
-    }else{
-      router.push("/")
+      async function Inspector(){
+      if (await AuthInspector.isAuthenticated()) {
+        setIsAuth(true)
+      } else {
+        setIsAuth(false)
+        router.push("/");
+        console.log("User is not authenticated");
+      }
     }
+  Inspector()
   },[])
 
 

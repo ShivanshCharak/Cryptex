@@ -1,6 +1,6 @@
 import { X } from 'lucide-react';
 
-export default function FilterSidebar({setShowFilter,showFilter}) {
+export default function FilterSidebar({setShowFilter,showFilter}:{setShowFilter:(show:boolean)=>void,showFilter:boolean}) {
 
   return (
     <div className={`

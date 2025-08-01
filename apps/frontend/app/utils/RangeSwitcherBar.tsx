@@ -24,7 +24,7 @@ export default function RangeSwitcherBar({
       case "barchart":
         return ChartType.CANDLESTICK;
       case "linechart":
-        return ChartType.LINE;
+        return ChartType.Line;
       case "baseline":
         return ChartType.BASELINE;
       case "area":

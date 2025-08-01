@@ -11,10 +11,10 @@ const allMetrics = {
   Others: ['Audited', 'Dominance %', 'Total Value Locked']
 };
 
-export default function MetricsSelector({showColumn, setShowColumn}) {
+export default function MetricsSelector({showColumn, setShowColumn}:{showColumn:boolean, setShowColumn:(column:boolean)=>void}) {
   const [selected, setSelected] = useState(['1h %', '24h %', '7d %', 'Market Cap', 'Volume(24h)', 'Circulating Supply', '7d Chart']);
 
-  const toggleMetric = (metric) => {
+  const toggleMetric = (metric:string) => {
     setSelected((prev) =>
       prev.includes(metric)
         ? prev.filter((m) => m !== metric)
@@ -24,7 +24,7 @@ export default function MetricsSelector({showColumn, setShowColumn}) {
     );
   };
 
-  const isSelected = (metric) => selected.includes(metric);
+  const isSelected = (metric:string) => selected.includes(metric);
 
   return (
     <div className={` bg-gray-900 text-white rounded-xl p-6 w-full max-w-xl shadow-lg

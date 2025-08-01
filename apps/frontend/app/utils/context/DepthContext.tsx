@@ -2,7 +2,8 @@
 "use client";
 
 import { createContext, useContext, useState, ReactNode, Dispatch, SetStateAction } from "react";
-import { TDepth, TTradeInfo } from "@/app/components/depth/type";
+
+import { TDepth,TTradeInfo } from "../types";
 import { KLine } from "../types";
 
 interface OrdersContextType {
@@ -21,7 +22,18 @@ const OrdersContext = createContext<OrdersContextType | undefined>(undefined);
 
 export function OrdersProvider({ children }: { children: ReactNode }) {
   const [latestOrders, setLatestOrders] = useState<number>(0);
-  const [klines, setKlines] = useState<KLine>({});
+  const [klines, setKlines] = useState<KLine>({
+     close: "",
+    end: "",
+    high: "",
+    low: "",
+    open: "",
+    quoteVolume: "",
+    start: "",
+    trades: "",
+    volume: "",
+
+  });
   const [depth, setDepth] = useState<TDepth>({ bids: [], asks: [] });
   const [trades, setTrades] = useState<TTradeInfo[]>([])
 

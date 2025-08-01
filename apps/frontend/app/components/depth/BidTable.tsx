@@ -1,6 +1,6 @@
-import { TDepthBids } from "@/app/utils/types";
 
-export const BidTable = ({ bids }: { bids: Array<{ price: string; quantity: string }> }) => {
+import { TTradeInfo } from "@/app/utils/types";
+export const BidTable = ({ bids }: { bids: Array<TTradeInfo> }) => {
     
     let currentTotal = 0;
 
@@ -31,7 +31,7 @@ export const BidTable = ({ bids }: { bids: Array<{ price: string; quantity: stri
 };
 
 function Bid({ price, quantity, total, maxTotal }: {
-    price: string;
+    price: number;
     quantity: number;
     total: number;
     maxTotal: number
@@ -66,10 +66,10 @@ function Bid({ price, quantity, total, maxTotal }: {
 
 
 
-export function ClubDepth(allBids: TDepthBids[]) {
+export function ClubDepth(allBids: TTradeInfo[]) {
     // <Price, quantity>
 
-    const priceChecker = new Map<string, number>()
+    const priceChecker = new Map<number, number>()
     allBids.forEach((bid) => {
         if (priceChecker.has(bid.price)) {
             const quantity = priceChecker.get(bid.price) || 0

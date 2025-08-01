@@ -1,10 +1,10 @@
-// components/MiniD3Chart.js
+
 'use client';
 
 import React, { useEffect, useRef,useState } from 'react';
 import * as d3 from 'd3';
 
-const MiniD3Chart = ({ data, color = '#4caf50', width, height = 20 }) => {
+const MiniD3Chart = ({ data, color = '#4caf50', width, height = 20 }:{data:Array<{width:number,time:string,value:number}>,color:string,width:number,height:number}) => {
   const chartRef = useRef(null);
 
   useEffect(() => {
@@ -29,12 +29,14 @@ const MiniD3Chart = ({ data, color = '#4caf50', width, height = 20 }) => {
     const yExtent = d3.extent(data, d => d.value);
     const yScale = d3
       .scaleLinear()
+      // @ts-ignore
       .domain(yExtent)
       .range([height, 0]);
 
     const line = d3
       .line()
       .x((d, i) => xScale(i))
+      // @ts-ignore
       .y(d => yScale(d.value))
       .curve(d3.curveMonotoneX); // smooth line
 
@@ -44,13 +46,14 @@ const MiniD3Chart = ({ data, color = '#4caf50', width, height = 20 }) => {
       .attr('fill', 'none')
       .attr('stroke', color)
       .attr('stroke-width', 2)
+      // @ts-ignore
       .attr('d', line);
   }, [data, color, width, height]);
 
   return <div ref={chartRef} />;
 };
 
-export const DynamicMiniChart = ({width}) => {
+export const DynamicMiniChart = ({width}:{width:number}) => {
   const [data, setData] = useState(generateData());
   function generateData() {
     const today = new Date();
@@ -77,5 +80,6 @@ export const DynamicMiniChart = ({width}) => {
     return () => clearInterval(interval);
   }, []);
 
+  // @ts-ignore
   return <MiniD3Chart data={data} width={width} color="#00ff91" />;
 };

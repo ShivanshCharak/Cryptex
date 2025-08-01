@@ -1,7 +1,7 @@
 "use client";
 import CategoryMarket from "../components/CategoryMarket";
 import CryptoTable from "../components/CryptoTable";
-import MarketAltCard from "../components/MarketAltCard";
+// import MarketAltCard from "../components/MarketAltCard
 
 import MarketCards from "../components/MarketCards";
 import { cryptoAssets, DexScan } from "../utils/DataPool";
@@ -70,7 +70,7 @@ export default function Market() {
             />
           ))}
         </div>
-        <MarketAltCard />
+        {/* <MarketAltCard /> */}
         <MarketNews />
       </div>
       <CategoryMarket />

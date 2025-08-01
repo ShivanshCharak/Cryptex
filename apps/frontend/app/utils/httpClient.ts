@@ -1,6 +1,6 @@
 import axios from "axios";
-import { Depth, KLine, Ticker, Trade } from "./types";
-import { TTradeInfo } from "../components/depth/type";
+import { Depth, KLine, TDepth, Ticker, Trade } from "./types";
+import { TTradeInfo } from "./types";
 
 // const BASE_URL = "https://exchange-proxy.100xdevs.com/api/v1";
 const BASE_URL = "http://localhost:3000/api/v1";
@@ -22,7 +22,7 @@ export async function getTickers(): Promise<Ticker[]> {
 }
 
 
-export async function getDepth(market: string): Promise<Depth> {
+export async function getDepth(market: string): Promise<TDepth> {
     const response = await axios.get(`${BASE_URL}/depth?symbol=${market}`);
     return response.data;
 }

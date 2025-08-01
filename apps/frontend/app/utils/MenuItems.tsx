@@ -59,7 +59,7 @@ import {
     },
   ];
   
-  export default function MegaMenu({showDexScan}) {
+  export default function MegaMenu({showDexScan}:{showDexScan:boolean}) {
     return (<>
     {
         showDexScan&&(

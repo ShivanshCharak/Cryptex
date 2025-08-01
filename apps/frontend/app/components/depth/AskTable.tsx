@@ -1,6 +1,7 @@
 import { ClubDepth } from "./BidTable";
+import { TDepth, TTradeInfo } from "@/app/utils/types";
 
-export const AskTable = ({ asks }: { asks: Array<{ price: string; quantity: string }> }) => {
+export const AskTable = ({ asks }: { asks: Array<TTradeInfo> }) => {
     let currentTotal = 0;
     
     const relevantAsks = ClubDepth(asks)
@@ -30,7 +31,7 @@ export const AskTable = ({ asks }: { asks: Array<{ price: string; quantity: stri
 };
 
 function Ask({ price, quantity, total, maxTotal }: { 
-    price: string; 
+    price: number; 
     quantity: number; 
     total: number; 
     maxTotal: number 

@@ -3,15 +3,13 @@
 import { useEffect, useState } from "react";
 import {
   getDepth,
-  getKlines,
   getTicker,
   getTrades,
 } from "../../utils/httpClient";
 import { BidTable } from "./BidTable";
 import { AskTable } from "./AskTable";
 import { SignalingManager } from "../../utils/SignalingManager";
-import { TTradeInfo, TDepth } from "./type";
-import { useRef } from "react";
+import { TTradeInfo, TDepth } from "@/app/utils/types";
 import { useOrders } from "@/app/utils/context/DepthContext";
 
 export function Depth({ market }: { market: string }) {
@@ -27,7 +25,6 @@ export function Depth({ market }: { market: string }) {
       bids: bids,
       asks: asks,
     });
-    console.log("useffect", depth);
   }, [bids, asks]);
   useEffect(() => {
 
@@ -38,15 +35,14 @@ export function Depth({ market }: { market: string }) {
         console.log("bids new",PostTradeDepth.bids)
         console.log("asks new",PostTradeDepth.asks)
         setBids((originalBids) => {
-          // const updatedBids: TTradeInfo[] = [];
+          
    const newBids: typeof originalBids = [] 
 
-          const askMap = new Map(originalBids.map((bid) => [bid.orderId, bid])); //o(n)
-          // Traverse updated depth came from backend, askMap gonna have all the asks array
+          const askMap = new Map(originalBids.map((bid) => [bid.orderId, bid])); 
           const updatedBid = PostTradeDepth.bids
           let deletedSet= new Set()
           for (let i:number = 0; i < updatedBid.length; i++) { //0(m)
-            const staleBid = askMap.get(updatedBid[i].orderId) // set and filter approach
+            const staleBid = askMap.get(updatedBid[i].orderId) 
             const remainingQuantity =  updatedBid[i].quantity-updatedBid[i].filled
             if(remainingQuantity<=0){
               deletedSet.add(updatedBid[i].orderId)
@@ -131,6 +127,7 @@ export function Depth({ market }: { market: string }) {
       params: [`depth@${market}`],
     });
     getDepth(market).then((d) => {
+    
       setBids(d.bids.reverse());
       setAsks(d.asks);
     });
@@ -149,6 +146,7 @@ export function Depth({ market }: { market: string }) {
       );
     };
   }, []);
+  
   return (
     <div className="h-full">
       <div className="flex w-[150px] justify-between ml-7 mt-4">
@@ -184,6 +182,7 @@ export function Depth({ market }: { market: string }) {
       ) : DepthType === "Book" ? (
         <> */}
           <TableHeader />
+         
           {asks && <AskTable asks={asks} />}
           {latestOrders && <div>{latestOrders}</div>}
           {bids && <BidTable bids={bids} />}

@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { Ticker } from "../utils/types";
 import { useOrders } from "../utils/context/DepthContext";
-import { TTradeInfo } from "./depth/type";
+import { TTradeInfo } from "../utils/types";
 
 export const MarketBar = ({ market }: { market: string }) => {
   const [ticker, setTicker] = useState<Partial<Ticker> | null>(null);
@@ -15,20 +15,20 @@ useEffect(() => {
   const firstPrice = !isNaN(Number(latestOrders))
     ? latestOrders
     : Number(depth.bids[0]?.price ?? 0);
-  const lastPrice = depth.bids.reduce((max, trade: Partial<TTradeInfo>) => {
+  const lastPrice = depth.bids.reduce((max:number, trade: Partial<TTradeInfo>) => {
     return Math.max(max, Number(trade.price ?? 0));
   }, 0);
 
   const newTicker: Partial<Ticker> = {
     firstPrice,
     lastPrice,
-    high: depth.asks.reduce((max, trade: Partial<TTradeInfo>) => {
+    high: depth.asks.reduce((max:number, trade: Partial<TTradeInfo>) => {
       return Math.max(max, Number(trade.price ?? 0));
     }, 0),
-    low: depth.asks.reduce((min, trade: Partial<TTradeInfo>) => {
+    low: depth.asks.reduce((min:number, trade: Partial<TTradeInfo>) => {
       return Math.min(min, Number(trade.price ?? Infinity));
     }, Infinity),
-    volume: depth.asks.reduce((sum, ask) => {
+    volume: depth.asks.reduce((sum:number, ask:{quantity:number}) => {
       return sum + Number(ask.quantity ?? 0);
     }, 0),
     change: lastPrice && firstPrice ? ((lastPrice - firstPrice) / firstPrice) * 100 : 0, 

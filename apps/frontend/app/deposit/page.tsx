@@ -10,12 +10,15 @@ export default function DepositMoney() {
   const [amountToDeposit, setAmountToDeposit] = useState<number|undefined>();
   const router =  useRouter()
   useEffect(()=>{
-    if(AuthInspector.isAuthenticated()){
-      setIsAuth(true)
-      console.log("user is authenticated")
-    }else{
-      router.push("/")
+    async function checkCreds(){
+      if(await AuthInspector.isAuthenticated()){
+        setIsAuth(true)
+        console.log("user is authenticated")
+      }else{
+        router.push("/")
+      }
     }
+    checkCreds()
   },[])
   const {setAmount}  = useUserAuth()  
 
