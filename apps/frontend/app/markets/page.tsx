@@ -4,10 +4,12 @@ import CryptoTable from "../components/CryptoTable";
 // import MarketAltCard from "../components/MarketAltCard
 
 import MarketCards from "../components/MarketCards";
+import { User } from "../utils/context/UserProvider";
 import { cryptoAssets, DexScan } from "../utils/DataPool";
 import MarketNews from "../components/MarketNews";
 import { useEffect } from "react";
 import { AuthInspector } from "../utils/AuthInspector";
+
 import { useRouter } from "next/navigation";
 import {
   Trending,
@@ -22,7 +24,7 @@ import { useUserAuth } from "../utils/context/UserProvider";
 
 export default function Market() {
   const router = useRouter();
-  const {setIsAuth} = useUserAuth()
+  const {setIsAuth,setUser} = useUserAuth()
   const cardConfigs: TcardConfig = [
     {
       type: "Trending Coins",
@@ -46,7 +48,9 @@ export default function Market() {
   useEffect(() => {
 
     async function Inspector(){
-      if (await AuthInspector.isAuthenticated()) {
+      const user  =  await AuthInspector.isAuthenticated() as User
+      if (user) {
+        setUser(user)
         setIsAuth(true)
       } else {
         setIsAuth(false)

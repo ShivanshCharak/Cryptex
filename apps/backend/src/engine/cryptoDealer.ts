@@ -1,7 +1,7 @@
 import e, { Request, Response } from 'express'
 import jwt from 'jsonwebtoken'
 import { UserToken } from './account'
-import prisma from 'postgres-prisma'
+import prisma, {Prisma} from '@repo/postgres-prisma'
 import { Decimal } from '@prisma/client/runtime/library'
 import { BUY, SELL } from '../types/types'
 // import { Prisma } from '@prisma/client'
@@ -27,7 +27,7 @@ export async function buyCrypto(req: Request, res: Response) {
         const decoded = jwt.verify(token, "gamma") as UserToken;
         const amountNeeded = (cryptoAmount.get("USD") ?? 0) * Number(requestedQuantity);
 
-        const result = await prisma.$transaction(async (tx) => {
+        const result = await prisma.$transaction(async (tx:Prisma.TransactionClient) => {
 
             const userAccount = await getUserAccount(tx, decoded.userId);
 
@@ -77,7 +77,7 @@ export async function sellCrypto(req: Request, res: Response) {
 
         const decoded = jwt.verify(token, "gamma") as UserToken;
 
-        const result = await prisma.$transaction(async (tx) => {
+        const result = await prisma.$transaction(async (tx:Prisma.TransactionClient) => {
             const userAccount = await getUserAccount(tx, decoded.userId);
 
             const userCrypto = await tx.cryptoBalance.findFirst({

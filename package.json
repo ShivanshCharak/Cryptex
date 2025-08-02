@@ -9,6 +9,7 @@
     "check-types": "turbo run check-types"
   },
   "devDependencies": {
+    "@types/cors": "^2.8.19",
     "@types/opossum": "^8.1.9",
     "prettier": "^3.5.3",
     "turbo": "^2.5.5",

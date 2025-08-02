@@ -11,6 +11,7 @@ import { OrdersProvider } from "@/app/utils/context/DepthContext";
 import { useEffect } from "react";
 import { BaselineChartView } from "@/app/components/charts/BaselineChartView";
 import { useOrders } from "@/app/utils/context/DepthContext";
+import { User } from "@/app/utils/context/UserProvider";
 import { ChartLoading } from "./loading";
 import { AuthInspector } from "@/app/utils/AuthInspector";
 import TopToolbar from "@/app/components/TopToolbar";
@@ -20,27 +21,31 @@ import { useUserAuth } from "@/app/utils/context/UserProvider";
 
 
 export default function Page() {
-    const {setIsAuth} = useUserAuth()
+    const {setIsAuth,setUser} = useUserAuth()
     const { market } = useParams();
     const router = useRouter()
-    const [token, setToken] = useState<string>("")
     const [range, setRange] = useState<"1D" | "1W" | "1M" | "1Y">("1D");
     const [chartType, setChartType] = useState<String>("barchart")
     const {depth} = useOrders()
 
+
     
-     useEffect(()=>{
-      async function Inspector(){
-      if (await AuthInspector.isAuthenticated()) {
-        setIsAuth(true)
-      } else {
-        setIsAuth(false)
-        router.push("/");
-        console.log("User is not authenticated");
-      }
-    }
-  Inspector()
-  },[])
+  useEffect(() => {
+ 
+     async function Inspector(){
+       const user  =  await AuthInspector.isAuthenticated() as User
+       if (user) {
+         setUser(user)
+         setIsAuth(true)
+       } else {
+         setIsAuth(false)
+         router.push("/");
+         console.log("User is not authenticated");
+       }
+     }
+   Inspector()
+   
+   }, []);
 
 
     return <div className="flex flex-row max:flex-col flex-1 over ">

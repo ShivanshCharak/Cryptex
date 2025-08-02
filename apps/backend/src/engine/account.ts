@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import prisma from "postgres-prisma";
+import prisma, {Prisma} from "@repo/postgres-prisma";
 import jwt from 'jsonwebtoken';
 import { httpTotalRequest,errorTotal,httpSuccessfullRequest } from "../Monitoring/metrics";
 
@@ -37,7 +37,7 @@ export  async function depositMoney(req: Request, res: Response):Promise<void> {
         }
 
 
-        const accountUpdated = await prisma.$transaction(async (tx) => {
+        const accountUpdated = await prisma.$transaction(async (tx:Prisma.TransactionClient) => {
             const existingUser = await tx.user.findUnique({
                 where: { email: req.user?.email },
                 select: { id: true }

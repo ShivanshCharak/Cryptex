@@ -4,7 +4,7 @@ import { Request,Response,NextFunction } from 'express'
 import { httpTotalRequest,httpRequestDurationSeconds } from './Monitoring/metrics'
 import express,{Express, RequestHandler} from 'express';
 import dotenv from 'dotenv';
-import prisma from 'postgres-prisma'
+import prisma from '@repo/postgres-prisma'
 import cors from 'cors'
 
 import auth from './routes/authRouter';
@@ -26,7 +26,7 @@ export const app:Express = express();
 
 prisma.$connect()
 .then(() => console.log("Prisma connected"))
-.catch((e) => {
+.catch((e:Error) => {
   console.error("Prisma connection failed:", e);
   process.exit(1);
 });

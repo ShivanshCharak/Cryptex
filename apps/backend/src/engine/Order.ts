@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import  jwt  from "jsonwebtoken";
-import prisma from "postgres-prisma";
+import prisma, {Prisma} from "@repo/postgres-prisma";
 import { UserToken } from "./account";
 
 export default async function createOrder(req:Request, res:Response){
@@ -76,7 +76,7 @@ export async function BulkCreateOrder(req: Request, res: Response) {
   });
 
   try {
-    await prisma.$transaction(async (tx) => {
+    await prisma.$transaction(async (tx:Prisma.TransactionClient) => {
       await tx.orders.createMany({
         // @ts-ignore
         data: orders ,

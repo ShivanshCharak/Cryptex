@@ -2,14 +2,13 @@
 
 import { toast } from "react-toastify";
 import { useUserAuth,User } from "./context/UserProvider";
-import { jwtDecode } from "jwt-decode";
+import { jwtDecode, JwtPayload } from "jwt-decode";
 
 
 export class AuthInspector {
   private constructor() {}
 
-  public static async isAuthenticated():Promise<boolean> {
-    const {setUser} = useUserAuth()
+  public static async isAuthenticated():Promise<JwtPayload|null> {
     try {
 
       const res = await fetch('http://localhost:3003/auth/me', {
@@ -21,15 +20,12 @@ export class AuthInspector {
         localStorage.setItem("cryptex-token",data.accessToken)
         toast.success(data.message)
         const user  = jwtDecode(data)
-        console.log(user)
-        setUser(user as User)
-
-        return true
+        return user
       }
 
-      return false
+      return null
     } catch (e) {
-      return false;
+      return null;
     }
   }
 }

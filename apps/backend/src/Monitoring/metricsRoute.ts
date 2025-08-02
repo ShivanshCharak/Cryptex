@@ -1,7 +1,7 @@
 import {  buisnessMetrics, memoryUsedGauge, redisPendingOrderGauge, register } from './metrics'
 import { app } from '../app'
 import { Request, Response, NextFunction,Router } from 'express'
-import prisma from 'postgres-prisma'
+
 import Redis from 'ioredis'
 import { memoryUsage } from 'process'
 

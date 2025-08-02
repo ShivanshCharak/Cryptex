@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import prisma from "postgres-prisma";
+import prisma, {Prisma} from "@repo/postgres-prisma";
 import { userLoginSchema, userSchema } from "../zodvalidator";
 import dotenv from 'dotenv'
 import { httpTotalRequest,errorTotal, httpSuccessfullRequest } from "../Monitoring/metrics";

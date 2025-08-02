@@ -1,11 +1,15 @@
 {
   "compilerOptions": {
+    "composite": true,
+    "incremental": true,
+    "skipDefaultLibCheck": true,
     "skipLibCheck": true,
     "noEmitOnError": false,
     "forceConsistentCasingInFileNames": true,
     "strict": false,
     "esModuleInterop": true,
     "module": "NodeNext",
+    
     "moduleResolution": "NodeNext",
     "target": "ES2020",
     "lib": ["ES2020"],
@@ -18,7 +22,7 @@
     { "path": "apps/frontend" },
     { "path": "apps/backend" },
     { "path": "packages/engine" },
-    { "path": "packages/prisma-client" },
+    { "path": "packages/postgres-prisma" },
     { "path": "packages/db" }
   ]
 }

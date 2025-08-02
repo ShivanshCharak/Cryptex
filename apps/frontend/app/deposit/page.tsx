@@ -4,22 +4,28 @@ import {toast} from 'react-toastify'
 import { useUserAuth } from "../utils/context/UserProvider";
 import { useRouter } from "next/navigation";
 import { AuthInspector } from "../utils/AuthInspector";
+import { User } from "../utils/context/UserProvider";
 
 export default function DepositMoney() {
-  const {setIsAuth} = useUserAuth()
+  const {setIsAuth,setUser} = useUserAuth()
   const [amountToDeposit, setAmountToDeposit] = useState<number|undefined>();
   const router =  useRouter()
-  useEffect(()=>{
-    async function checkCreds(){
-      if(await AuthInspector.isAuthenticated()){
+ useEffect(() => {
+
+    async function Inspector(){
+      const user  =  await AuthInspector.isAuthenticated() as User
+      if (user) {
+        setUser(user)
         setIsAuth(true)
-        console.log("user is authenticated")
-      }else{
-        router.push("/")
+      } else {
+        setIsAuth(false)
+        router.push("/");
+        console.log("User is not authenticated");
       }
     }
-    checkCreds()
-  },[])
+  Inspector()
+  
+  }, []);
   const {setAmount}  = useUserAuth()  
 
   const handleDeposit = async () => {

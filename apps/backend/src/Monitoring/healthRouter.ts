@@ -1,7 +1,8 @@
 import { buisnessMetrics,  } from './metrics'
 import{ Router }from 'express'
 import { Request, Response, NextFunction } from 'express'
-import prisma from 'postgres-prisma'
+import prisma from '@repo/postgres-prisma'
+
 import Redis from 'ioredis'
 
 export const healthRouter = Router()
