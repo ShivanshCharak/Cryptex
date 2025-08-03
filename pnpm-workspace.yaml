@@ -1,0 +1,9 @@
+"packages":
+  - "api"
+  - "backend"
+  - "postgres-prisma"
+  - "engine"
+  - "frontend"
+  - "db"
+  - "docker"
+  - "ws"

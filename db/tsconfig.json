@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+
+    "target": "es2016",                                  /* Set the JavaScript language version for emitted JavaScript and include compatible library declarations. */
+
+    "module": "commonjs",                                /* Specify what module code is generated. */
+    "rootDir": "./src",                                  /* Specify the root folder within your source files. */                                /* Specify a file that bundles all outputs into one JavaScript file. If 'declaration' is true, also designates a file that bundles all .d.ts output. */
+    "outDir": "./dist",                                   /* Specify an output folder for all emitted files. */
+   
+    "esModuleInterop": true,                             
+   
+    "forceConsistentCasingInFileNames": true,            
+   
+    "strict": true,                                      
+    "skipLibCheck": true                                 
+  }
+}
