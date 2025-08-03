@@ -1,33 +1,13 @@
 {
-  "name": "exchange",
-  "private": true,
+  "name": "cryptex",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
   "scripts": {
-    "build": "turbo run build",
-    "dev": "turbo run dev",
-    "lint": "turbo run lint",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
-    "check-types": "turbo run check-types"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "devDependencies": {
-    "@types/cors": "^2.8.19",
-    "@types/opossum": "^8.1.9",
-    "prettier": "^3.5.3",
-    "turbo": "^2.5.5",
-    "typescript": "5.8.2"
-  },
-  "engines": {
-    "node": ">=18"
-  },
-  "packageManager": "npm@8.19.4",
-  "workspaces": [
-    "apps/*",
-    "packages/*"
-  ],
-  "dependencies": {
-    "@prisma/client": "^6.9.0",
-    "@swc/helpers": "^0.5.17",
-    "client-only": "^0.0.1",
-    "opossum": "^9.0.0",
-    "react-toastify": "^11.0.5"
-  }
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.14.0"
 }

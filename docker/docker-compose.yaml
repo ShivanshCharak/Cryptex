@@ -35,6 +35,20 @@ services:
     ports:
       - "6379:6379"
 
+  # backend:
+  #   image: backend
+  #   depends_on:
+  #     - redis
+  #     - postgresdb
+  #   networks:
+  #     - monitoring_net
+  #   ports:
+  #     - "3000:3003"
+  #   environment:
+  #     REDIS_URL: redis://redis:6379
+  #     DATABASE_URL: postgres://shivansh:shamsher%4054@postgresdb:5432/users
+
+
   grafana:
     image: grafana/grafana:latest
     ports:
@@ -64,7 +78,6 @@ services:
       - postgresdb
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
-
 volumes:
   timescale-data:
   postgres-data:
