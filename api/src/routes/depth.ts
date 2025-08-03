@@ -7,6 +7,7 @@ import { httpTotalRequest, httpSuccessfullRequest } from '@repo/backend/metrics'
 export const depthRouter:Router = Router()
 
 depthRouter.get("/",async (req,res)=>{
+    {console.log("gettting orders")}
       httpTotalRequest.inc({
             method:"post",
             routes:"api/v1/depth"
@@ -24,6 +25,7 @@ depthRouter.get("/",async (req,res)=>{
             routes:"/api/v1/depth",
             message:"depth sent to the frontend"
         })
+        console.log(response.payload)
    
     res.json(response.payload)
 

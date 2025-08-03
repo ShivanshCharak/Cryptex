@@ -56,8 +56,8 @@ export default function Page() {
                 <div className="flex flex-col flex-1 w-[500px]">
                     <RangeSwitcherBar activeRange={range} onRangeChange={setRange} setChartType={setChartType} chartType={chartType} />
                 <div className="w-full  flex-col border-slate-800 border-t"></div>
+                {console.log(depth,"chart")}
                 {depth.bids.length>0 || depth.asks.length>0?<>
-                
                     {chartType === "barchart" ? <>  <TradeView market="SOL" range={range} /></> : <BaselineChartView market="SOL" range={range} />}
                 </>
                     :<><ChartLoading/></>
