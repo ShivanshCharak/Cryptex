@@ -78,6 +78,7 @@ export function SwapUI({ market }: { market: string }) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+   
 
     try {
       const order = {
@@ -86,8 +87,9 @@ export function SwapUI({ market }: { market: string }) {
         type,
         price: parseFloat(price),
         quantity: parseFloat(quantity),
-        userId: user?.user.id,
+        userId: user?.userId,
       };
+      console.log(order)
 
       const res = await fetch("http://localhost:3000/api/v1/order", {
         method: "POST",
@@ -95,6 +97,7 @@ export function SwapUI({ market }: { market: string }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(order),
       });
+      console.log("order",order)
 
       if (!res.ok) throw new Error(`Server Error: ${res.status}`);
       const data = await res.json();

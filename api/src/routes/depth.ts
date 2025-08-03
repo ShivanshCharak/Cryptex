@@ -25,7 +25,7 @@ depthRouter.get("/",async (req,res)=>{
             routes:"/api/v1/depth",
             message:"depth sent to the frontend"
         })
-        console.log(response.payload)
+
    
     res.json(response.payload)
 
