@@ -1,13 +1,4 @@
 "use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Orderbook = void 0;
 const type_1 = require("../utils/type");
@@ -19,8 +10,13 @@ const type_1 = require("../utils/type");
 //   delete(price: number): void {}
 // }
 class Orderbook {
+    bids;
+    asks;
+    baseAsset;
+    quoteAsset = type_1.BASE_CURRENCY;
+    lastTradeId;
+    currentPrice;
     constructor(baseAsset, bids, asks, lastTradeId, currentPrice) {
-        this.quoteAsset = type_1.BASE_CURRENCY;
         this.bids = bids;
         this.asks = asks;
         this.baseAsset = baseAsset;
@@ -39,41 +35,39 @@ class Orderbook {
             currentPrice: this.currentPrice
         };
     }
-    addOrder(order) {
-        return __awaiter(this, void 0, void 0, function* () {
-            // console.log("order.side",order.side)
-            if (order.side === "buy") {
-                const { executedQty, fills } = this.matchBid(order);
-                order.filled = executedQty;
-                if (order.filled === order.quantity) {
-                    return {
-                        executedQty,
-                        fills,
-                    };
-                }
-                this.bids.push(order);
+    async addOrder(order) {
+        // console.log("order.side",order.side)
+        if (order.side === "buy") {
+            const { executedQty, fills } = this.matchBid(order);
+            order.filled = executedQty;
+            if (order.filled === order.quantity) {
+                return {
+                    executedQty,
+                    fills,
+                };
+            }
+            this.bids.push(order);
+            return {
+                executedQty,
+                fills
+            };
+        }
+        else {
+            const { executedQty, fills } = this.matchAsk(order);
+            order.filled = executedQty;
+            if (order.filled === order.quantity) {
                 return {
                     executedQty,
                     fills
                 };
             }
-            else {
-                const { executedQty, fills } = this.matchAsk(order);
-                order.filled = executedQty;
-                if (order.filled === order.quantity) {
-                    return {
-                        executedQty,
-                        fills
-                    };
-                }
-                this.asks.push(order);
-                // console.log("fills and bids ", this.bids,order)
-                return {
-                    executedQty,
-                    fills
-                };
-            }
-        });
+            this.asks.push(order);
+            // console.log("fills and bids ", this.bids,order)
+            return {
+                executedQty,
+                fills
+            };
+        }
     }
     //  sell = ask, bids=buy
     matchBid(order) {
@@ -99,8 +93,13 @@ class Orderbook {
         }
         console.log(order.quantity, executedQty);
         if (order.quantity > executedQty) {
-            this.bids.push(Object.assign(Object.assign({}, order), { filled: executedQty }));
-            fills.push(Object.assign(Object.assign({}, order), { filled: executedQty, otherUserId: order.userId, tradeId: this.lastTradeId++ }));
+            this.bids.push({ ...order, filled: executedQty });
+            fills.push({
+                ...order,
+                filled: executedQty,
+                otherUserId: order.userId,
+                tradeId: this.lastTradeId++,
+            });
             console.log("Partially filled bids updated ", this.bids);
         }
         else {
@@ -140,8 +139,13 @@ class Orderbook {
             }
         }
         if (order.quantity > executedQty) {
-            this.asks.push(Object.assign(Object.assign({}, order), { filled: executedQty }));
-            fills.push(Object.assign(Object.assign({}, order), { filled: executedQty, otherUserId: order.userId, tradeId: this.lastTradeId++ }));
+            this.asks.push({ ...order, filled: executedQty });
+            fills.push({
+                ...order,
+                filled: executedQty,
+                otherUserId: order.userId,
+                tradeId: this.lastTradeId++,
+            });
             console.log("fills", fills);
             console.log("Partially filled bids updated ", this.bids);
         }
@@ -158,3 +162,4 @@ class Orderbook {
     }
 }
 exports.Orderbook = Orderbook;
+//# sourceMappingURL=Orderbook.js.map

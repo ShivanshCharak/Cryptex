@@ -92,7 +92,7 @@ export default function AuthModal({ setShowAuth = () => {} }: Partial<Props>) {
           user: {
             username: String(fetched.user.username),
             email: String(fetched.user.email),
-            id: String(fetched.user.id)
+            userId: String(fetched.user.id)
           }
         });
         localStorage.setItem('cryptex-token', fetched.accessToken);

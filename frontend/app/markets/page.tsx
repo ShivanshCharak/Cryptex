@@ -60,7 +60,9 @@ export default function Market() {
       }
     }
   Inspector()
-  
+
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   return (
     <div>

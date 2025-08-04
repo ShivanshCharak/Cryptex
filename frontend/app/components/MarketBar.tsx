@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Ticker } from "../utils/types";
 import { useOrders } from "../utils/context/DepthContext";
 import { TTradeInfo } from "../utils/types";
+import Image from "next/image";
 
 export const MarketBar = ({ market }: { market: string }) => {
   const [ticker, setTicker] = useState<Partial<Ticker> | null>(null);
@@ -174,14 +175,18 @@ function MarketInfoLabel({ market }: { market: string }) {
   return (
     <div className="flex h-[60px] shrink-0 space-x-4">
       <div className="flex flex-row relative ml-2 -mr-4">
-        <img
+        <Image
+        width="24"
+        height="24"
           alt="Base Token Logo"
           loading="lazy"
           decoding="async"
           className="z-10 rounded-full h-6 w-6 mt-4"
           src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTVvBqZC_Q1TSYObZaMvK0DRFeHZDUtVMh08Q&s"
         />
-        <img
+        <Image
+        width="24"
+        height="24"
           alt="Quote Token Logo"
           loading="lazy"
           decoding="async"

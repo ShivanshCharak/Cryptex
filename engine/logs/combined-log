@@ -854,3 +854,14 @@
 {"level":"info","message":"Databse trades started","timestamp":"2025-08-03T20:54:48.313Z"}
 {"level":"info","message":"Order created for the 67d2ae29-e764-428e-b619-b813a4054105 side: buy quantity:100","timestamp":"2025-08-03T20:54:48.317Z"}
 {"level":"info","message":"Sent deth succesfully for the userId 67d2ae29-e764-428e-b619-b813a4054105","timestamp":"2025-08-03T20:54:48.317Z"}
+{"level":"info","message":"Sent deth succesfully for the userId undefined","timestamp":"2025-08-04T08:35:43.409Z"}
+{"level":"info","message":"Sent deth succesfully for the userId undefined","timestamp":"2025-08-04T08:35:43.426Z"}
+{"level":"info","message":"Sent deth succesfully for the userId undefined","timestamp":"2025-08-04T08:36:33.134Z"}
+{"level":"info","message":"Sent deth succesfully for the userId undefined","timestamp":"2025-08-04T08:36:33.138Z"}
+{"level":"info","message":"Sent deth succesfully for the userId undefined","timestamp":"2025-08-04T08:37:04.895Z"}
+{"level":"info","message":"Sent deth succesfully for the userId undefined","timestamp":"2025-08-04T08:37:04.909Z"}
+{"level":"info","message":"Added order [object Object] and quantity 1","timestamp":"2025-08-04T08:37:36.056Z"}
+{"level":"info","message":"Redis transaction completed succesfully for cmcrdek6q0014jxbyb9hffkgl 67d2ae29-e764-428e-b619-b813a4054105","timestamp":"2025-08-04T08:37:36.066Z"}
+{"level":"info","message":"Databse trades started","timestamp":"2025-08-04T08:37:36.067Z"}
+{"level":"info","message":"Order created for the 67d2ae29-e764-428e-b619-b813a4054105 side: buy quantity:1","timestamp":"2025-08-04T08:37:36.068Z"}
+{"level":"info","message":"Sent deth succesfully for the userId 67d2ae29-e764-428e-b619-b813a4054105","timestamp":"2025-08-04T08:37:36.069Z"}

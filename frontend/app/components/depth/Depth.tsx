@@ -25,6 +25,9 @@ export function Depth({ market }: { market: string }) {
       bids: bids,
       asks: asks,
     });
+
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [bids, asks]);
   useEffect(() => {
 
@@ -145,6 +148,8 @@ export function Depth({ market }: { market: string }) {
         `DEPTH-${market}`
       );
     };
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   
   return (

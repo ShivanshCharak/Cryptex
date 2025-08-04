@@ -47,7 +47,7 @@ export default function MarketAltCard() {
 import * as d3 from "d3";
 
 export function createGauge({
-  containerId,
+  containerId="",
   value = 50,
   min = 0,
   max = 100,
@@ -74,18 +74,20 @@ export function createGauge({
     .domain([min, max])
     .range([-Math.PI / 2, Math.PI / 2]);
 
-  // Draw background arc
-  const arc = d3.arc()
+  
+  let arc = d3.arc()
     .innerRadius(radius - 20)
     .outerRadius(radius)
     .startAngle(scale(min))
     .endAngle(scale(max));
 
   g.append("path")
-    .attr("d", arc)
+  // @ts-ignore
+    .attr("d", (d: d3.DefaultArcObject) => arc(d)!)
+
     .attr("fill", "#eee");
 
-  // Draw ticks
+  
   const numTicks = 10;
   const tickData = d3.range(min, max + 1, (max - min) / numTicks);
 

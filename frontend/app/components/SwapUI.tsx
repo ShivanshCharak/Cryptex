@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useUserAuth } from "../utils/context/UserProvider";
 import { useOrders } from "../utils/context/DepthContext";
-
+import Image from "next/image";
 type OrderType = "limit" | "market";
 type OrderSide = "buy" | "sell";
 
@@ -79,6 +79,7 @@ export function SwapUI({ market }: { market: string }) {
     e.preventDefault();
     setIsSubmitting(true);
    
+  
 
     try {
       const order = {
@@ -87,7 +88,7 @@ export function SwapUI({ market }: { market: string }) {
         type,
         price: parseFloat(price),
         quantity: parseFloat(quantity),
-        userId: user?.userId,
+        userId: user?.user.userId,
       };
       console.log(order)
 
@@ -196,7 +197,9 @@ export function SwapUI({ market }: { market: string }) {
                   required
                 />
                 <div className="absolute right-1 top-1 p-2">
-                  <img
+                  <Image
+                  width="24"
+                  height="24"
                     src="https://backpack.exchange/coins/usd.svg"
                     className="w-6 h-6"
                     alt="USD"
@@ -219,7 +222,9 @@ export function SwapUI({ market }: { market: string }) {
                   required
                 />
                 <div className="absolute right-1 top-1 p-2">
-                  <img
+                  <Image
+                  width="24"
+                  height="24"
                     src="https://backpack.exchange/_next/image?url=%2Fcoins%2Fbtc.png&w=48&q=95"
                     className="w-6 h-6"
                     alt="BTC"
@@ -245,7 +250,9 @@ export function SwapUI({ market }: { market: string }) {
                   className="h-12 rounded-lg text-white text-2xl bg-[#202127] border-none p-5 w-full focus:outline-none focus:ring-2 duration-300 focus:ring-blue-500"
                 />
                 <div className="absolute right-1 top-1 p-2">
-                  <img
+                  <Image
+                  width={24}
+                  height={24}
                     src="https://backpack.exchange/coins/usd.svg"
                     className="w-6 h-6"
                     alt="USD"
