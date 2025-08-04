@@ -1,6 +1,6 @@
 'use client'
 import { useEffect, useState } from "react";
-import { ArrowUpRight, ArrowDownRight } from "lucide-react";
+import Image from "next/image";
 
 export default function MarketNews() {
     return (
@@ -8,7 +8,7 @@ export default function MarketNews() {
             <div className="bg-[#222531] w-[55%] mr-[20px] h-[170px] my-2 rounded">
                 <section className="flex w-full justify-between p-5">
                     <section className="flex items-center w-[180px] justify-between">
-                        <img className="w-[20px] h-[20px]" src="https://s3.coinmarketcap.com/static-gravity/image/6fbea0356edd48a4a68a4b877195443c.png" alt="" />
+                        <Image width="20" height="20" className="w-[20px] h-[20px]" src="https://s3.coinmarketcap.com/static-gravity/image/6fbea0356edd48a4a68a4b877195443c.png" alt="" />
                         <span className="text-[14px] font-bold">Bitcoin</span>
                         <svg viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" height="1em" width="1em" className="sc-65e7f566-0 kALOHD c-i icon-certified" >
                             <use href="#verified"><symbol id="verified" className="sc-65e7f566-0 eQBACe">

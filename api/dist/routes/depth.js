@@ -7,6 +7,9 @@ const index_1 = require("../types/index");
 const metrics_1 = require("@repo/backend/metrics");
 exports.depthRouter = (0, express_1.Router)();
 exports.depthRouter.get("/", async (req, res) => {
+    {
+        console.log("gettting orders");
+    }
     metrics_1.httpTotalRequest.inc({
         method: "post",
         routes: "api/v1/depth"

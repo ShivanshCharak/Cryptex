@@ -86,12 +86,12 @@ function MarketRow({ market }: { market: Ticker }) {
               style={{ width: "40px", height: "40px" }}
             >
               <div className="relative">
-                <img
+                <Image
                   alt={market.symbol}
                   src={"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTVvBqZC_Q1TSYObZaMvK0DRFeHZDUtVMh08Q&s"}
                   loading="lazy"
-                  width="40"
-                  height="40"
+                  width={40}
+                  height={40}
                   decoding="async"
                   data-nimg="1"
                   className=""

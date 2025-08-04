@@ -27,3 +27,4 @@ exports.logger = (0, winston_1.createLogger)({
         })
     ]
 });
+//# sourceMappingURL=logger.js.map

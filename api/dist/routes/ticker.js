@@ -1,9 +1,8 @@
 "use strict";
+// import { Router } from "express";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.tickersRouter = void 0;
-const express_1 = require("express");
-exports.tickersRouter = (0, express_1.Router)();
-exports.tickersRouter.get("/", async (res) => {
-    res.json({});
-});
+// export const tickersRouter:Router = Router();
+// tickersRouter.get("/", async (res:Request) => {    
+//     res.json({message});
+// });
 //# sourceMappingURL=ticker.js.map

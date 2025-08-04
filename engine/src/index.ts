@@ -27,7 +27,7 @@ async function main() {
   );
   breaker.on("reject", () => console.warn("[Breaker] Execution rejected."));
   breaker.on("timeout", () => console.error("[Breaker] Execution timed out."));
-  breaker.on("failure", (err) =>
+  breaker.on("failure", (err:Error) =>
     console.error("[Breaker] Execution failed:", err.message)
   );
 
@@ -36,7 +36,9 @@ async function main() {
       const response = await redis.brpop("messages", 30);
 
       if (response) {
-        const { key, element } = response;
+        const [ key, element ] = response;
+        console.log(key,element)
+        
         await breaker.fire(JSON.parse(element));
       }
     } catch (err) {

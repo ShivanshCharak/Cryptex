@@ -13,7 +13,7 @@ export interface User {
   user: {
     username: string;
     email: string;
-    id: string;
+    userId: string;
   };
 }
 

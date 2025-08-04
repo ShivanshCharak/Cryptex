@@ -1,3 +1,2 @@
-import { Router } from "express";
-export declare const tickersRouter: Router;
+export {};
 //# sourceMappingURL=ticker.d.ts.map

@@ -21,7 +21,6 @@ import Image from "next/image";
 import { Button } from "./core/Button";
 import { useRouter } from "next/navigation";
 import { Burger, Search, Tag } from "../utils/SVGPool";
-import { Portfolio_svg, Watchlist } from "../utils/SVGPool";
 import MegaMenu from "../utils/MenuItems";
 import { useUserAuth } from "../utils/context/UserProvider";
 import { AuthInspector } from "../utils/AuthInspector";
@@ -83,6 +82,8 @@ export function Appbar(){
      }
    }
  Inspector()
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   },[])
 
   return (

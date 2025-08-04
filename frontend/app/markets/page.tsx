@@ -1,7 +1,7 @@
 "use client";
 import CategoryMarket from "../components/CategoryMarket";
 import CryptoTable from "../components/CryptoTable";
-// import MarketAltCard from "../components/MarketAltCard
+import MarketAltCard from "../components/MarketAltCard"
 
 import MarketCards from "../components/MarketCards";
 import { User } from "../utils/context/UserProvider";
@@ -60,7 +60,9 @@ export default function Market() {
       }
     }
   Inspector()
-  
+
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   return (
     <div>
@@ -75,7 +77,7 @@ export default function Market() {
             />
           ))}
         </div>
-        {/* <MarketAltCard /> */}
+        <MarketAltCard />
         <MarketNews />
       </div>
       <CategoryMarket />

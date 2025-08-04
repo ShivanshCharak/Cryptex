@@ -40,6 +40,7 @@ useEffect(() => {
       const to = Math.floor(Date.now() / 1000);
       const from = Math.floor(getStartTimestamp(range) / 1000);
       klineData = await getKlines(market, "1w", from, to);
+      console.log("klines data", klineData)
       setKlines(klineData[0])
       
 
@@ -74,6 +75,9 @@ useEffect(() => {
     };
 
     init();
+
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
