@@ -244,6 +244,7 @@ return result
 
   createDbTrades(fills: Fill[], market: string, userId: string) {
     logger.info("Databse trades started")
+    console.log("DB TRADESS ")
     fills.forEach((fill) => {
       RedisManager.getInstance().pushMessage({
         type: "TRADE_ADDED",

@@ -15,11 +15,13 @@ pgClient.connect();
 export const klineRouter:Router = Router();
 
 klineRouter.get("/", async (req, res) => {
+    console.log("HITTING")
       httpTotalRequest.inc({
             method:"get",
             routes:"api/v1/klines"
         })
     const {  startTime, endTime } = req.query;
+    console.log("starttime",startTime,endTime,req.query)
 
 
     let query;
@@ -37,10 +39,12 @@ klineRouter.get("/", async (req, res) => {
             return res.status(400).send('Invalid interval');
     }
 
+    console.log("resultdata", "fjv",query)
     try {
         //@ts-ignore
-        const result = await pgClient.query(query, [new Date(startTime * 1000 as string), new Date(endTime * 1000 as string)]);
-
+        console.log("result",startTime,endTime)
+        const result = await pgClient.query(query, [new Date(Number(endTime)), new Date(Number(startTime))]);
+        console.log("result",result)
         res.json(result.rows.map(x => ({
             close: x.close,
             end: x.bucket,
