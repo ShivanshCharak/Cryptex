@@ -11,6 +11,7 @@ export class User{
         this.addListeners()
     }
     emit(message:any) {
+
         this.ws.send(JSON.stringify(message));
     }
  

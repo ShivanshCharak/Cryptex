@@ -3,6 +3,7 @@ import { BaselineChartManager } from "../../utils/charts/BaselineChartManager";
 import { getKlines } from "../../utils/httpClient";
 import { KLine } from "../../utils/types";
 import { UTCTimestamp } from "lightweight-charts";
+import { Trades } from "./Trades";
 
 function getStartTimestamp(range: string): number {
   const now = Date.now();

@@ -5,6 +5,7 @@ import { getKlines } from "../../utils/httpClient";
 import { useOrders } from "@/app/utils/context/DepthContext";
 import { KLine } from "../../utils/types";
 import { ColorType } from "lightweight-charts";
+import { Trades } from "./Trades";
 
 
 function getStartTimestamp(range: string): number {
@@ -40,10 +41,7 @@ useEffect(() => {
       const to = Math.floor(Date.now() / 1000);
       const from = Math.floor(getStartTimestamp(range) / 1000);
       klineData = await getKlines(market, "1w", from, to);
-      console.log("klines data", klineData)
-      setKlines(klineData[0])
-      
-
+      setKlines(klineData)
       } catch (e) {
         console.error("Failed to fetch klines", e);
       }
@@ -82,6 +80,8 @@ useEffect(() => {
 
   return (
     <div style={{ position: "relative", height: "70%", width: "100%" }}>
+
+     {klines &&klines.length>0 && <Trades market={"SOL_USDC" as string}/>}
       <div
         ref={chartRef}
         className="tradechart"

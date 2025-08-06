@@ -47,14 +47,12 @@ export class RedisManager {
 
     }
     public async publishMessage(channel: string, message: any) {
-        {console.log("channel",channel)}
+        {console.log("channel",channel,message)}
         await this.client.publish(channel, JSON.stringify(message));
     }
 
     public async sendToApi(clientId: string, message: any) {
         const result = await this.client.publish(clientId, JSON.stringify(message));
-        
-
     }
 
     public async setHash(key: string, data: Record<string, string>) {

@@ -9,8 +9,8 @@ import { KLine } from "../types";
 interface OrdersContextType {
   latestOrders: number;
   setLatestOrders:(trade:number)=>void
-  klines: KLine;
-  setKlines: (klines: KLine) => void;
+  klines: KLine[]|undefined;
+  setKlines: (klines: KLine[]) => void;
 
   depth: TDepth;
   setDepth: (depth: TDepth) => void;
@@ -22,18 +22,7 @@ const OrdersContext = createContext<OrdersContextType | undefined>(undefined);
 
 export function OrdersProvider({ children }: { children: ReactNode }) {
   const [latestOrders, setLatestOrders] = useState<number>(0);
-  const [klines, setKlines] = useState<KLine>({
-     close: "",
-    end: "",
-    high: "",
-    low: "",
-    open: "",
-    quoteVolume: "",
-    start: "",
-    trades: "",
-    volume: "",
-
-  });
+  const [klines, setKlines] = useState<KLine[]>([]);
   const [depth, setDepth] = useState<TDepth>({ bids: [], asks: [] });
   const [trades, setTrades] = useState<TTradeInfo[]>([])
 
