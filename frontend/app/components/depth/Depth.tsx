@@ -25,8 +25,6 @@ export function Depth({ market }: { market: string }) {
       bids: bids,
       asks: asks,
     });
-
-
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [bids, asks]);
   useEffect(() => {
@@ -174,7 +172,7 @@ export function Depth({ market }: { market: string }) {
       </div>
 
       {/* Shimmer loading UI if depth not available */}
-      {/* {!depth?.bids?.length || !depth?.asks?.length ? (
+      {!depth?.bids?.length || !depth?.asks?.length ? (
         <div className="p-4 space-y-3">
           {[...Array(10)].map((_, i) => (
             <div key={i} className="flex justify-between animate-pulse">
@@ -185,13 +183,13 @@ export function Depth({ market }: { market: string }) {
           ))}
         </div>
       ) : DepthType === "Book" ? (
-        <> */}
+        <>
           <TableHeader />
          
           {asks && <AskTable asks={asks} />}
           {latestOrders && <div>{latestOrders}</div>}
           {bids && <BidTable bids={bids} />}
-        {/* </>
+        </>
       ) : (
         <>
           {trades.length > 0 ? (
@@ -203,7 +201,7 @@ export function Depth({ market }: { market: string }) {
             <h1 className="text-slate-500 text-sm mt-4">No trades found</h1>
           )}
         </>
-      )} */}
+      )}
     </div>
   );
 }

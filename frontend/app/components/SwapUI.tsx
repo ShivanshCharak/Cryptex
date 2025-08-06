@@ -88,7 +88,7 @@ export function SwapUI({ market }: { market: string }) {
         type,
         price: parseFloat(price),
         quantity: parseFloat(quantity),
-        userId: user?.user.userId,
+        userId: user?.userId,
       };
       console.log(order)
 

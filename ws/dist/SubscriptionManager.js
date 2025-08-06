@@ -7,10 +7,11 @@ class SubscriptionManager {
     constructor() {
         this.subscriptions = new Map();
         this.reverseSubscription = new Map();
-        this.redisCallbackHandler = (message, channel) => {
+        this.redisCallbackHandler = (channel, message) => {
             var _a;
             const parsedMessage = JSON.parse(message);
-            console.log(parsedMessage);
+            console.log(`📨 Redis Message Received | Channel: ${channel}`);
+            console.log(`📨 Message:`, parsedMessage);
             (_a = this.reverseSubscription.get(channel)) === null || _a === void 0 ? void 0 : _a.forEach(s => { var _a, _b; return (_b = (_a = UserManager_1.UserManager.getInstance()) === null || _a === void 0 ? void 0 : _a.getUser(s)) === null || _b === void 0 ? void 0 : _b.emit(parsedMessage); });
         };
         this.redisClient = (0, redis_1.createClient)();
@@ -24,6 +25,7 @@ class SubscriptionManager {
     }
     subscribe(userId, subscription) {
         var _a, _b;
+        console.log("all subscription", this.subscriptions);
         if ((_a = this.subscriptions.get(userId)) === null || _a === void 0 ? void 0 : _a.includes(subscription)) {
             return;
         }
@@ -33,7 +35,9 @@ class SubscriptionManager {
             this.reverseSubscription.set(subscription, [...existing, userId]);
         }
         if (((_b = this.reverseSubscription.get(subscription)) === null || _b === void 0 ? void 0 : _b.length) === 1) {
-            this.redisClient.subscribe(subscription, this.redisCallbackHandler);
+            this.redisClient.subscribe(subscription, (message, channel) => {
+                this.redisCallbackHandler(channel, message);
+            });
         }
     }
     unsubscribe(userId, subscription) {

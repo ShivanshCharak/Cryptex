@@ -34,11 +34,18 @@ export class SignalingManager {
             });
             this.bufferedMessages = [];
         }
+        this.ws.onerror= (err)=>{
+            console.warn(" WebSocket error",err);
+        }
+
+            this.ws.onclose = () => {
+                console.warn("WebSocket closed");
+            };
         this.ws.onmessage = (event) => {
             const message = JSON.parse(event.data);
             const type = message.data.e;
-            console.log("message received")
-
+            console.log("message received",message,type)
+            
             if (this.callbacks[type]) {
                 // @ts-ignore
                 this.callbacks[type].forEach(({ callback }) => {
@@ -56,22 +63,15 @@ export class SignalingManager {
                         console.log(newTicker);
                         callback(newTicker);
                    }
-                   if (type === "depth") {
-                        // const newTicker: Partial<Ticker> = {
-                        //     lastPrice: message.data.c,
-                        //     high: message.data.h,
-                        //     low: message.data.l,
-                        //     volume: message.data.v,
-                        //     quoteVolume: message.data.V,
-                        //     symbol: message.data.s,
-                        // }
-                        // console.log(newTicker);
-                        // callback(newTicker);
+                   else if (type === "depth") {
                         console.log(message)
                         const updatedBids = message.data.b;
                         const updatedAsks = message.data.a;
                         console.log()
                         callback({ bids: updatedBids, asks: updatedAsks });
+                    }else if(type==="trade"){
+                        console.log("inside trade",message.data)
+                    callback(message.data)
                     }
                 });
             }
@@ -79,31 +79,34 @@ export class SignalingManager {
     }
 
     sendMessage(message: any) {
+
         const messageToSend = {
             ...message,
             id: this.id++
         }
         if (!this.initialized) {
+
             this.bufferedMessages.push(messageToSend);
             return;
         }
         this.ws.send(JSON.stringify(messageToSend));
     }
 
-    async registerCallback(type: string, callback: any, id: string) {
+    registerCallback(type: string, callback: any, id: string) {
         this.callbacks[type] = this.callbacks[type] || [];
         this.callbacks[type].push({ callback, id });
         console.log("callbacks",this.callbacks)
         // "ticker" => callback
     }
 
-    async deRegisterCallback(type: string, id: string) {
+    deRegisterCallback(type: string, id: string) {
         if (this.callbacks[type]) {
             // @ts-ignore
             const index = this.callbacks[type].findIndex(callback => callback.id === id);
             if (index !== -1) {
                 this.callbacks[type].splice(index, 1);
             }
+            console.log("dergister callbacks",this.callbacks)
         }
     }
 }

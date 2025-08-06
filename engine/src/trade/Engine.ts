@@ -140,7 +140,7 @@ export class Engine {
 
     this.createDbTrades(fills, market, userId);
 
-    this.publishWsTrades(fills, userId, market);
+    // this.publishWsTrades(fills, userId, market);
     return { fills, executedQty };
   }
 
@@ -244,6 +244,7 @@ return result
 
   createDbTrades(fills: Fill[], market: string, userId: string) {
     logger.info("Databse trades started")
+    console.log("DB TRADESS ")
     fills.forEach((fill) => {
       RedisManager.getInstance().pushMessage({
         type: "TRADE_ADDED",
@@ -289,21 +290,22 @@ return result
     });
   }
 
-  publishWsTrades(fills: Fill[], userId: string, market: string) {
-    fills.forEach((fill) => {
-      RedisManager.getInstance().publishMessage(`trade@${market}`, {
-        stream: `trade@${market}`,
-        data: {
-          e: "trade",
-          t: fill.tradeId,
-          m: fill.otherUserId === userId, 
-          p: fill.price,
-          q: fill.quantity.toString(),
-          s: market,
-        },
-      });
-    });
-  }
+  // publishWsTrades(fills: Fill[], userId: string, market: string) {
+  //   console.log("Publishing trades",fills)
+  //   fills.forEach((fill) => {
+  //     RedisManager.getInstance().publishMessage(`trade@${market}`, {
+  //       stream: `trade@${market}`,
+  //       data: {
+  //         e: "trade",
+  //         t: fill.tradeId,
+  //         m: fill.otherUserId === userId, 
+  //         p: fill.price,
+  //         q: fill.quantity.toString(),
+  //         s: market,
+  //       },
+  //     });
+  //   });
+  // }
   publisWsDepthUpdates(
     fills: Fill[],
     price: number,

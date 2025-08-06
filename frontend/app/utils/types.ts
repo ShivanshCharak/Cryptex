@@ -1,15 +1,15 @@
 
 import { JSX } from "react";
 export interface KLine {
-    close: string;
+    close: number;
     end: string;
-    high: string;
-    low: string;
-    open: string;
-    quoteVolume: string;
-    start: string;
+    high: number;
+    low: number;
+    open: number;
+    // quoteVolume: string;
+    start: number;
     trades: string;
-    volume: string;
+    volume: number;
 }
 
 export interface Trade {
