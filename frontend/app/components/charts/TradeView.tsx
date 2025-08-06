@@ -33,6 +33,7 @@ const tooltipRef = useRef<HTMLDivElement>(null);
 const {setKlines, klines} = useOrders()
 
 
+
 useEffect(() => {
   const init = async () => {
     
@@ -77,11 +78,17 @@ useEffect(() => {
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+  useEffect(()=>{
+    if(klines){
+
+      chartManagerRef.current?.update(klines[klines?.length-1])
+    }
+  },[klines])
 
   return (
     <div style={{ position: "relative", height: "70%", width: "100%" }}>
 
-     {klines &&klines.length>0 && <Trades market={"SOL_USDC" as string}/>}
+     {klines &&klines.length>0 && <Trades market={"SOL_USDC" as string} />}
       <div
         ref={chartRef}
         className="tradechart"

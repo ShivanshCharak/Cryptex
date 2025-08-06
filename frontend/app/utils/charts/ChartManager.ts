@@ -14,7 +14,8 @@ type CrosshairMoveEvent = {
 
 export class ChartManager {
   private candleSeries: ISeriesApi<"Candlestick">;
-  private maSeries: ISeriesApi<"Line">; // ✅ Added
+  
+  private maSeries: ISeriesApi<"Line">; 
   private lastUpdateTime: number = 0;
   private chart: any;
 
@@ -82,33 +83,39 @@ export class ChartManager {
       lineWidth: 2,
       priceLineVisible:false,
     });
-    this.candleSeries=chart.addCandlestickSeries({
-      priceScaleId:''
-    })
+    
     
     
     this.subscribeToCrosshairMove(tooltipel);
   }
   
 
-  public update(updatedPrice: any) {
-    if (!this.lastUpdateTime) {
-      this.lastUpdateTime = new Date().getTime();
-    }
+ public update(updatedPrice: {
+  open: number;
+  high: number;
+  low: number;
+  close: number;
+  current:number
+  end: string; 
+  newCandleInitiated: boolean;
+}) {
+  
+  console.log("updated price",updatedPrice.close)
+  const timestamp = Math.floor(new Date(updatedPrice.end)) as UTCTimestamp;
 
-    this.candleSeries.update({
-      time: (this.lastUpdateTime / 1000) as UTCTimestamp,
-      close: updatedPrice.close,
-      low: updatedPrice.low,
-      high: updatedPrice.high,
-      open: updatedPrice.open,
-    });
+  this.candleSeries.update({
+    time: timestamp,
+    close: updatedPrice.close,
+    low: updatedPrice.low,
+    high: updatedPrice.high,
+    open: updatedPrice.open,
+  });
 
-
-    if (updatedPrice.newCandleInitiated) {
-      this.lastUpdateTime = updatedPrice.time;
-    }
+  if (updatedPrice.newCandleInitiated) {
+    this.lastUpdateTime = updatedPrice.time;
   }
+}
+
 
   public setLocale(locale: string) {
     this.chart.applyOptions({
