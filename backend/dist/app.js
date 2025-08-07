@@ -88,7 +88,7 @@ exports.app.use((req, res, next) => {
 });
 exports.app.use("/auth", authRouter_1.default);
 exports.app.use("/account", authMiddleware_1.authMiddleware, moneyRouter_1.default); // ← attaches /account/deposit
-exports.app.use("/order", authMiddleware_1.authMiddleware, orderRouter_1.default);
+exports.app.use("/order", orderRouter_1.default);
 exports.app.use("/metrics", metricsRoute_1.metricsRouter);
 exports.app.use("/health", healthRouter_1.healthRouter);
 process.on('SIGINT', () => __awaiter(void 0, void 0, void 0, function* () {

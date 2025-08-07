@@ -96,7 +96,7 @@ app.use((req,res,next)=>{
 
 app.use("/auth" ,auth);
 app.use("/account" ,authMiddleware ,moneyDeposit); // ← attaches /account/deposit
-app.use("/order",authMiddleware ,orderDeposit);
+app.use("/order", orderDeposit);
 app.use("/metrics",metricsRouter)
 app.use("/health",healthRouter)
 

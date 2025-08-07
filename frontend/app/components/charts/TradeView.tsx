@@ -33,6 +33,7 @@ const tooltipRef = useRef<HTMLDivElement>(null);
 const {setKlines, klines} = useOrders()
 
 
+
 useEffect(() => {
   const init = async () => {
     
@@ -40,7 +41,9 @@ useEffect(() => {
     try {
       const to = Math.floor(Date.now() / 1000);
       const from = Math.floor(getStartTimestamp(range) / 1000);
+      
       klineData = await getKlines(market, "1w", from, to);
+
       setKlines(klineData)
       } catch (e) {
         console.error("Failed to fetch klines", e);
@@ -77,11 +80,31 @@ useEffect(() => {
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+  useEffect(()=>{
+    if (klines) {
+      console.log("klines changes")
+  chartManagerRef.current?.update(
+    klines.length > 0
+      ? klines[klines.length - 1]
+      : {
+          close: 0,
+          end: 0,
+          high: 0,
+          low: 0,
+          open: 0,
+          trades: "",
+          volume: 0,
+          current:0,
+          newCandleInitiated:true
+        }
+  );
+}
+
+  },[klines])
 
   return (
     <div style={{ position: "relative", height: "70%", width: "100%" }}>
-
-     {klines &&klines.length>0 && <Trades market={"SOL_USDC" as string}/>}
+     { <Trades market={market as string} />}
       <div
         ref={chartRef}
         className="tradechart"

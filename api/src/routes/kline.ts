@@ -20,17 +20,17 @@ klineRouter.get("/", async (req, res) => {
             method:"get",
             routes:"api/v1/klines"
         })
-    const {  startTime, endTime } = req.query;
+    const {  startTime, endTime,symbol } = req.query;
     console.log("starttime",startTime,endTime,req.query)
-
-
+    let market = symbol?.toString().split("_")[0]?.toLowerCase()
+    console.log(market)
     let query;
     switch ('1h') {
         // case '1m':
         //     query = `SELECT * FROM klines_1m WHERE bucket >= $1 AND bucket <= $2`;
         //     break;
         case '1h':
-            query = `SELECT * FROM klines_1h WHERE  bucket >= $1 AND bucket <= $2`;
+            query = `SELECT * FROM klines_${market}_1h WHERE  bucket >= $1 AND bucket <= $2`;
             break;
         // case '1w':
         //     query = `SELECT * FROM klines_1w WHERE bucket >= $1 AND bucket <= $2`;

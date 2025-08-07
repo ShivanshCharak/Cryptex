@@ -15,7 +15,7 @@ import { useOrders } from "@/app/utils/context/DepthContext";
 export function Depth({ market }: { market: string }) {
   const [bids, setBids] = useState<Array<TTradeInfo>>([]);
   const [asks, setAsks] = useState<Array<TTradeInfo>>([]);
-  const [price, setPrice] = useState<number>();
+  const [setPrice] = useState<number>();
   const [DepthType, setDepthType] = useState<string>("Book");
   const { depth, setDepth, latestOrders, trades } = useOrders();
 
