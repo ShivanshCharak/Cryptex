@@ -82,6 +82,7 @@ useEffect(() => {
   }, []);
   useEffect(()=>{
     if (klines) {
+      console.log("klines changes")
   chartManagerRef.current?.update(
     klines.length > 0
       ? klines[klines.length - 1]
@@ -103,7 +104,6 @@ useEffect(() => {
 
   return (
     <div style={{ position: "relative", height: "70%", width: "100%" }}>
-      {console.log("klinesupdating",klines)}
      { <Trades market={market as string} />}
       <div
         ref={chartRef}
