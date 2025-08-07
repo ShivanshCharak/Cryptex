@@ -99,8 +99,8 @@ export class ChartManager {
   end: string; 
   newCandleInitiated: boolean;
 }) {
-  
-  console.log("updated price",updatedPrice.close)
+  console.log("updated price",updatedPrice)
+
   const timestamp = Math.floor(new Date(updatedPrice.end)) as UTCTimestamp;
 
   this.candleSeries.update({

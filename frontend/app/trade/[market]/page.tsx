@@ -4,7 +4,7 @@ import { SwapUI } from "@/app/components/SwapUI";
 import { TradeView } from "@/app/components/charts/TradeView";
 import { Depth } from "@/app/components/depth/Depth";
 import { useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, usePathname } from "next/navigation";
 import RangeSwitcherBar from "@/app/utils/RangeSwitcherBar";
 import { AreaChartView } from "@/app/components/AreaChartView";
 import { OrdersProvider } from "@/app/utils/context/DepthContext";
@@ -23,13 +23,11 @@ import { useUserAuth } from "@/app/utils/context/UserProvider";
 export default function Page() {
     const {setIsAuth,setUser} = useUserAuth()
     const { market } = useParams();
+    console.log(market)
     const router = useRouter()
     const [range, setRange] = useState<"1D" | "1W" | "1M" | "1Y">("1D");
     const [chartType, setChartType] = useState<String>("barchart")
     const {depth} = useOrders()
-
-
-    
   useEffect(() => {
  
      async function Inspector(){
@@ -60,7 +58,7 @@ export default function Page() {
                 <div className="w-full  flex-col border-slate-800 border-t"></div>
                 
                 {depth.bids.length>0 || depth.asks.length>0?<>
-                    {chartType === "barchart" ? <>  <TradeView market="SOL" range={range} /></> : <BaselineChartView market="SOL" range={range} />}
+                    {chartType === "barchart" ? <>  <TradeView market={market as string} range={range} /></> : <BaselineChartView market={market as string} range={range} />}
                 </>
                     :<><ChartLoading/></>
                 }

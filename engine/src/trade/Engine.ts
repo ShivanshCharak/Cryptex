@@ -1,9 +1,6 @@
 import { RedisManager } from "../RedisManager";
-import {
-
-  OrderBuyScript,
-} from "../utils/luaScript";
-import {logger} from '../logger/logger'
+import { OrderBuyScript } from "../utils/luaScript";
+import { logger } from "../logger/logger";
 import { Orderbook } from "./Orderbook";
 import { Order, Fill } from "../utils/type";
 import fs from "fs";
@@ -13,29 +10,42 @@ import { Depth, BASE_CURRENCY, UserBalance } from "../utils/type";
 
 export const redis = new RedisManager();
 export class Engine {
-  private orderbooks: Partial<Orderbook[]> = [];
+  private orderbooks: Map<string, Orderbook> = new Map();
 
   private DepthMap: Depth = {};
 
   constructor() {
     let snapshot = null;
-    this.orderbooks = [new Orderbook("SOL", [], [], 0, 0)];
+    this.orderbooks = new Map<string, Orderbook>();
   }
 
   async init() {
     if (process.env.WITH_SNAPSHOT) {
       const snapshot = fs.readFileSync("./snapshot.json");
     } else {
-
       await this.loadOrdersToRedis();
       await this.updateOrderBook();
-      await this.loadUserBalancesToRedis();
-      await this.loadCryptoToRedis();
+      await this.loadUserBalancesToRedis;
     }
   }
 
-  async process({ message, clientId }: { message: {type:string, data:{market:string,price:number,quantity:number,side:"buy"|"sell",userId:string,}}; clientId: string }) {
-    console.log(message,clientId)
+  async process({
+    message,
+    clientId,
+  }: {
+    message: {
+      type: string;
+      data: {
+        market: string;
+        price: number;
+        quantity: number;
+        side: "buy" | "sell";
+        userId: string;
+      };
+    };
+    clientId: string;
+  }) {
+    console.log(message, clientId);
     switch (message.type) {
       case "CREATE_ORDER": {
         try {
@@ -54,17 +64,23 @@ export class Engine {
               fills,
             },
           });
-          logger.info(`Order created for the ${message.data.userId} side: ${message.data.side} quantity:${message.data.quantity}`)
+          logger.info(
+            `Order created for the ${message.data.userId} side: ${message.data.side} quantity:${message.data.quantity}`
+          );
         } catch (error) {
-          logger.error(`Error during create order ${error}`)
+          logger.error(`Error during create order ${error}`);
           console.error("Create order error", error);
         }
       }
-      case "GET_DEPTH":
+      case "GET_DEPTH":{
+        
         try {
           const market = message.data.market;
-          const orderbook = this.orderbooks.find((o) => o?.ticker() === market);
-
+          console.log("market",market)
+          const orderbook = this.orderbooks.get(market.split("_")[0]) 
+          
+          
+          console.log("gegtugn reuqest",market)
           if (!orderbook) {
             throw new Error("No orderbook found");
           }
@@ -73,9 +89,11 @@ export class Engine {
             type: "DEPTH",
             payload: { bids: orderbook.bids, asks: orderbook.asks },
           });
-          logger.info(`Sent deth succesfully for the userId ${message.data.userId}`)
+          logger.info(
+            `Sent deth succesfully for the userId ${message.data.userId}`
+          );
         } catch (e) {
-          logger.warn(`No depth found for ${message.data.userId}`)
+          logger.warn(`No depth found for ${message.data.userId}`);
           RedisManager.getInstance().sendToApi(clientId, {
             type: "DEPTH",
             payload: {
@@ -87,6 +105,7 @@ export class Engine {
         break;
     }
   }
+  }
   // Base asset:- TATA, Quote asset:- Inr
   async createOrder(
     market: string,
@@ -95,7 +114,7 @@ export class Engine {
     side: "buy" | "sell",
     userId: string
   ) {
-    const orderbook = this.orderbooks.find((o) => o?.ticker() === market);
+    const orderbook = this.orderbooks.get(market.split("_")[0]) 
     const baseAsset = market.split("_")[0];
     const quoteAsset = market.split("_")[1];
 
@@ -117,11 +136,10 @@ export class Engine {
     };
 
     const { fills, executedQty } = await orderbook.addOrder(order);
-    logger.info(`Added order ${fills} and quantity ${executedQty}`)
+    logger.info(`Added order ${fills} and quantity ${executedQty}`);
     await Promise.all(
-      fills.map((fill) =>{
-
-       return this.InitiateRedisTrades(
+      fills.map((fill) => {
+        return this.InitiateRedisTrades(
           fill.orderId,
           userId,
           fill.otherUserId,
@@ -129,13 +147,10 @@ export class Engine {
           fill.quantity,
           fill.side,
           fill?.filled
-        )
-      }
-      )
+        );
+      })
     );
 
-
- 
     this.publisWsDepthUpdates(fills, price, side, market);
 
     this.createDbTrades(fills, market, userId);
@@ -156,11 +171,13 @@ export class Engine {
     try {
       // Input validation
       if (isNaN(price) || isNaN(fillAmount)) {
-        logger.error(`Invalid price and amount for ${orderId} or ${buyerUserId} While sending it to redis`)
+        logger.error(
+          `Invalid price and amount for ${orderId} or ${buyerUserId} While sending it to redis`
+        );
         throw new Error("Invalid price or fill amount");
       }
 
-      const result= await redis.evaluateTransaction(OrderBuyScript, {
+      const result = (await redis.evaluateTransaction(OrderBuyScript, {
         arguments: [
           orderId,
           buyerUserId,
@@ -170,34 +187,40 @@ export class Engine {
           side,
           filled?.toString(),
         ],
-      }) as {
-  ok:string,
-  buyerUserId: string,
-    sellerUserId:string,
-  totalCost: string,
-  filled: string,
-  newfill: string,
-  price: string
-  }|{
-     err:string,
-    needed:string,
-    available:string
-  };      
+      })) as
+        | {
+            ok: string;
+            buyerUserId: string;
+            sellerUserId: string;
+            totalCost: string;
+            filled: string;
+            newfill: string;
+            price: string;
+          }
+        | {
+            err: string;
+            needed: string;
+            available: string;
+          };
       this.syncArraysWithRedisResult(result, orderId, price, side);
 
-
-     if ('err' in result) {
-  // result is of type: { err: string; needed: string; available: string; }
-  logger.error(`redis transaction failed for ${orderId} ${buyerUserId}`,result.err)
-  console.log('Error:', result.err);
-} else {
-  logger.info(`Redis transaction completed succesfully for ${orderId} ${buyerUserId}`)
-  // result is of type: { ok: string; buyerUserId: string; ... }
-  console.log('Success:', result.ok);
-}
-return result
+      if ("err" in result) {
+        // result is of type: { err: string; needed: string; available: string; }
+        logger.error(
+          `redis transaction failed for ${orderId} ${buyerUserId}`,
+          result.err
+        );
+        console.log("Error:", result.err);
+      } else {
+        logger.info(
+          `Redis transaction completed succesfully for ${orderId} ${buyerUserId}`
+        );
+        // result is of type: { ok: string; buyerUserId: string; ... }
+        console.log("Success:", result.ok);
+      }
+      return result;
     } catch (error) {
-      logger.error(`Trade initiation failed: ${error}`)
+      logger.error(`Trade initiation failed: ${error}`);
       console.error("Trade initiation failed:", error);
       throw error;
     }
@@ -210,7 +233,10 @@ return result
     side: "buy" | "sell"
   ) {
     const orderbook = this.orderbooks[0];
-    if (!orderbook){ logger.warn(`No orderbookfound while executing orderId ${orderId}` ); return;}
+    if (!orderbook) {
+      logger.warn(`No orderbookfound while executing orderId ${orderId}`);
+      return;
+    }
 
     if (result.ok === "ORDER_COMPLETE") {
       if (side === "buy") {
@@ -222,9 +248,8 @@ return result
           (order) => order.orderId !== orderId
         );
       }
-    
     } else if (result.ok === "PARTIAL_FILL") {
-      logger.info(`PARTIALLY FILLED ${orderId}`)
+      logger.info(`PARTIALLY FILLED ${orderId}`);
       const orderArray = side === "buy" ? orderbook.bids : orderbook.asks;
       const orderIndex = orderArray.findIndex(
         (order) => order.orderId === orderId
@@ -239,12 +264,11 @@ return result
         );
       }
     }
-
   }
 
   createDbTrades(fills: Fill[], market: string, userId: string) {
-    logger.info("Databse trades started")
-    console.log("DB TRADESS ")
+    logger.info("Databse trades started");
+    console.log("DB TRADESS ");
     fills.forEach((fill) => {
       RedisManager.getInstance().pushMessage({
         type: "TRADE_ADDED",
@@ -267,7 +291,7 @@ return result
     fills: Fill[],
     market: string
   ) {
-    logger.info("DB trades initiated")
+    logger.info("DB trades initiated");
     RedisManager.getInstance().pushMessage({
       type: "ORDER_UPDATE",
       data: {
@@ -290,42 +314,21 @@ return result
     });
   }
 
-  // publishWsTrades(fills: Fill[], userId: string, market: string) {
-  //   console.log("Publishing trades",fills)
-  //   fills.forEach((fill) => {
-  //     RedisManager.getInstance().publishMessage(`trade@${market}`, {
-  //       stream: `trade@${market}`,
-  //       data: {
-  //         e: "trade",
-  //         t: fill.tradeId,
-  //         m: fill.otherUserId === userId, 
-  //         p: fill.price,
-  //         q: fill.quantity.toString(),
-  //         s: market,
-  //       },
-  //     });
-  //   });
-  // }
   publisWsDepthUpdates(
     fills: Fill[],
     price: number,
     side: "buy" | "sell",
     market: string
   ) {
-    
-    const orderbook = this.orderbooks.find((o) => o?.ticker() === market);
-    
+    const orderbook = this.orderbooks.get(market.split("_")[0]) 
+
     if (!orderbook) return;
 
     const updatedAsk: Order[] = [];
     const updatedBid: Order[] = [];
-    
-    
+
     for (const fill of fills) {
       const orderType = fill.side === "buy" ? "bids" : "asks";
-
-     
-    
 
       if (fill) {
         const updatedOrder: Order = {
@@ -336,7 +339,6 @@ return result
           userId: fill.otherUserId,
           filled: fill.filled,
         };
-    
 
         if (updatedOrder.quantity > 0) {
           (orderType === "asks" ? updatedAsk : updatedBid).push(updatedOrder);
@@ -348,7 +350,7 @@ return result
       console.log("No depth changes to publish");
       return;
     }
-    console.log(updatedAsk,updatedBid)
+    console.log(updatedAsk, updatedBid);
 
     RedisManager.getInstance().publishMessage(`depth@${market}`, {
       stream: `depth@${market}`,
@@ -364,7 +366,6 @@ return result
 
   async loadUserBalancesToRedis() {
     const accounts = await prisma.accountBalance.findMany({});
-    
 
     try {
       accounts.forEach((account) => {
@@ -375,36 +376,11 @@ return result
         };
         redis.batchLoad(redisKey, balanceData);
       });
-      
     } catch (error) {
       console.error("Error occurred while saving balances to Redis", error);
     }
   }
 
-  async loadCryptoToRedis() {
-    const cryptos = await prisma.cryptoBalance.findMany();
-    if (!cryptos) {
-    console.log(`No account found for user crypt`);
-      return;
-    }
-
-    try {
-      const loaded = await Promise.all(
-        cryptos.map((crypto) => {
-          redis.setHash(`crypto:${crypto.userId}`, {
-            [`${crypto.asset}_available`]: crypto?.quantity.toString(),
-            [`${crypto.asset}_locked`]: "0",
-            asset: crypto?.asset.toString(),
-            userId: crypto?.userId.toString(),
-            accountId: crypto?.accountId?.toString() as string,
-          });
-        })
-      );
-    
-    } catch (error) {
-      console.log("Error occured while saving crypot balance", error);
-    }
-  }
   async loadOrdersToRedis() {
     const orders = await prisma.orders.findMany({});
 
@@ -431,50 +407,41 @@ return result
   }
 
   // Orderbook crafted just for SOL_USDC MARKET
-  async updateOrderBook() {
-    for (let orderbook of this.orderbooks) {
-      if (orderbook?.baseAsset === "SOL") {
-        orderbook.bids = [];
-        orderbook.asks = [];
-      }
-    }
+async updateOrderBook() {
+  try {
+    const keys = await redis.scanKeysStream(); // Get all keys
+    for (let key of keys) {
+      const data = await redis.getAllHashFields(key);
 
-    try {
-      const keys = await redis.scanKeysStream();
-      for (let key in keys) {
-        const data = await redis.getAllHashFields(keys[key]);
-    
-        if (data.market === "SOL") {
-          for (let order of this.orderbooks) {
-            if (order?.baseAsset === data.market) {
-              if (data.side === "buy") {
-                order.bids.push({
-                  price: Number(data.price),
-                  quantity: Number(data.quantity),
-                  orderId: data.orderId,
-                  filled: Number(data.filled),
-                  side: data.side,
-                  userId: data.userId,
-                });
-              } else {
-                order.asks.push({
-                  price: Number(data.price),
-                  quantity: Number(data.quantity),
-                  orderId: data.orderId,
-                  filled: Number(data.filled),
-                  side: data.side==="buy"?"buy":"sell",
-                  userId: data.userId,
-                });
-              }
-            }
-          }
-        }
+      if (!data.market) continue;
+
+      if (!this.orderbooks.has(data.market)) {
+        this.orderbooks.set(data.market, new Orderbook(data.market, [], [], 0, 0));
       }
-    
-    } catch (error) {
-      console.log(error);
+
+      const orderbook = this.orderbooks.get(data.market)!;
+      const order: Order = {
+        price: Number(data.price),
+        quantity: Number(data.quantity),
+        orderId: data.orderId,
+        filled: Number(data.filled),
+        side: data.side as "buy" | "sell",
+        userId: data.userId,
+        market:data.market
+      };
+
+      if (data.side === "buy") {
+        orderbook.bids.push(order);
+      } else {
+        orderbook.asks.push(order);
+      }
+  
     }
+  } catch (err) {
+    logger.error("Error updating orderbooks:", err);
   }
+}
+
 
   async syncOrderbookToDB() {}
   // setBaseBalances() {
@@ -512,4 +479,3 @@ return result
   //     });
   // }
 }
-

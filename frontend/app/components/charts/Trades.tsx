@@ -26,6 +26,7 @@ export function Trades({ market }: { market: string }) {
         interval: string;
         l: number;
       }) => {
+        console.log("trades gottt",trades)
         setKlines((prev: KLine[]) => {
           const updated = [...prev];
           const klineMapper = new Map<string, number>();

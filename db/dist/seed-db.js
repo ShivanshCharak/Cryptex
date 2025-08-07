@@ -27,18 +27,36 @@ function initializeDB() {
         DROP MATERIALIZED VIEW IF EXISTS klines_1w CASCADE;
     `);
         // Create fresh table
-        // await client.query(`
-        //     CREATE TABLE "sol_prices"(
-        //         time TIMESTAMP WITH TIME ZONE NOT NULL,
-        //         price DOUBLE PRECISION,
-        //         volume DOUBLE PRECISION,
-        //         currency_code VARCHAR(10)
-        //     );
-        //     SELECT create_hypertable('sol_prices', 'time', 'price', 2);
-        // `);
+        yield client.query(`
+        CREATE TABLE "sol_prices"(
+            time TIMESTAMP WITH TIME ZONE NOT NULL,
+            price DOUBLE PRECISION,
+            volume DOUBLE PRECISION,
+            currency_code VARCHAR(10)
+        );
+        SELECT create_hypertable('sol_prices', 'time', 'price', 2);
+    `);
+        yield client.query(`
+         CREATE TABLE "btc_prices"(
+            time TIMESTAMP WITH TIME ZONE NOT NULL,
+            price DOUBLE PRECISION,
+            volume DOUBLE PRECISION,
+            currency_code VARCHAR(10)
+        );
+        SELECT create_hypertable('btc_prices', 'time', 'price', 2);
+        `);
+        yield client.query(`
+         CREATE TABLE "doge_prices"(
+            time TIMESTAMP WITH TIME ZONE NOT NULL,
+            price DOUBLE PRECISION,
+            volume DOUBLE PRECISION,
+            currency_code VARCHAR(10)
+        );
+        SELECT create_hypertable('doge_prices', 'time', 'price', 2);
+        `);
         // Create views again
         yield client.query(`
-        CREATE MATERIALIZED VIEW klines_1m AS
+        CREATE MATERIALIZED VIEW klines_sol_1m AS
         SELECT
             time_bucket('1 minute', time) AS bucket,
             first(price, time) AS open,
@@ -51,7 +69,7 @@ function initializeDB() {
         GROUP BY bucket, currency_code;
     `);
         yield client.query(`
-        CREATE MATERIALIZED VIEW klines_1h AS
+        CREATE MATERIALIZED VIEW klines_sol_1h AS
         SELECT
             time_bucket('1 hour', time) AS bucket,
             first(price, time) AS open,
@@ -64,7 +82,7 @@ function initializeDB() {
         GROUP BY bucket, currency_code;
     `);
         yield client.query(`
-        CREATE MATERIALIZED VIEW klines_1w AS
+        CREATE MATERIALIZED VIEW klines_sol_1w AS
         SELECT
             time_bucket('1 week', time) AS bucket,
             first(price, time) AS open,
@@ -74,6 +92,84 @@ function initializeDB() {
             sum(volume) AS volume,
             currency_code
         FROM sol_prices
+        GROUP BY bucket, currency_code;
+    `);
+        yield client.query(`
+        CREATE MATERIALIZED VIEW klines_btc_1m AS
+        SELECT
+            time_bucket('1 minute', time) AS bucket,
+            first(price, time) AS open,
+            max(price) AS high,
+            min(price) AS low,
+            last(price, time) AS close,
+            sum(volume) AS volume,
+            currency_code
+        FROM btc_prices
+        GROUP BY bucket, currency_code;
+    `);
+        yield client.query(`
+        CREATE MATERIALIZED VIEW klines_btc_1h AS
+        SELECT
+            time_bucket('1 hour', time) AS bucket,
+            first(price, time) AS open,
+            max(price) AS high,
+            min(price) AS low,
+            last(price, time) AS close,
+            sum(volume) AS volume,
+            currency_code
+        FROM btc_prices
+        GROUP BY bucket, currency_code;
+    `);
+        yield client.query(`
+        CREATE MATERIALIZED VIEW klines_btc_1w AS
+        SELECT
+            time_bucket('1 week', time) AS bucket,
+            first(price, time) AS open,
+            max(price) AS high,
+            min(price) AS low,
+            last(price, time) AS close,
+            sum(volume) AS volume,
+            currency_code
+        FROM btc_prices
+        GROUP BY bucket, currency_code;
+    `);
+        yield client.query(`
+        CREATE MATERIALIZED VIEW klines_doge_1m AS
+        SELECT
+            time_bucket('1 minute', time) AS bucket,
+            first(price, time) AS open,
+            max(price) AS high,
+            min(price) AS low,
+            last(price, time) AS close,
+            sum(volume) AS volume,
+            currency_code
+        FROM doge_prices
+        GROUP BY bucket, currency_code;
+    `);
+        yield client.query(`
+        CREATE MATERIALIZED VIEW klines_doge_1h AS
+        SELECT
+            time_bucket('1 hour', time) AS bucket,
+            first(price, time) AS open,
+            max(price) AS high,
+            min(price) AS low,
+            last(price, time) AS close,
+            sum(volume) AS volume,
+            currency_code
+        FROM doge_prices
+        GROUP BY bucket, currency_code;
+    `);
+        yield client.query(`
+        CREATE MATERIALIZED VIEW klines_doge_1w AS
+        SELECT
+            time_bucket('1 week', time) AS bucket,
+            first(price, time) AS open,
+            max(price) AS high,
+            min(price) AS low,
+            last(price, time) AS close,
+            sum(volume) AS volume,
+            currency_code
+        FROM btc_prices
         GROUP BY bucket, currency_code;
     `);
         yield client.end();

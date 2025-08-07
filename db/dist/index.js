@@ -23,7 +23,6 @@ function main() {
     return __awaiter(this, void 0, void 0, function* () {
         const redisClient = (0, redis_1.createClient)();
         yield redisClient.connect();
-        console.log("connected to redis");
         while (true) {
             const obj = yield redisClient.brPop("db_processor", 20);
             if (obj === null || obj === void 0 ? void 0 : obj.element) {
@@ -38,7 +37,9 @@ function main() {
                         const price = data.data.data.price;
                         const timestamp = new Date(Number(data.data.data.timestamp));
                         const quantity = data.data.data.quantity;
-                        const query = "Insert into sol_prices(time,price,volume,currency_code) values($1,$2,$3,$4)";
+                        let market = data.data.data.market.split("_")[0].toLowerCase();
+                        console.log(market);
+                        const query = `Insert into ${market}_prices(time,price,volume,currency_code) values($1,$2,$3,$4)`;
                         const values = [timestamp, price, quantity, "SOL"];
                         const result = yield pgClient.query(query, values);
                     }
@@ -50,20 +51,20 @@ function main() {
                         yield pgClient.query(query, values);
                     }
                     const klineQuery = `
-    SELECT
-      time_bucket('1 hour', time) AS interval,
-      first(price, time) AS open,
-      max(price) AS high,
-      min(price) AS low,
-      last(price, time) AS close,
-      sum(volume) AS volume
-    FROM sol_prices
-    WHERE currency_code = 'SOL'
-      AND time >= NOW() - INTERVAL '1 minute'
-    GROUP BY interval
-    ORDER BY interval DESC
-    LIMIT 60;
-  `;
+                      SELECT
+                        time_bucket('1 hour', time) AS interval,
+                        first(price, time) AS open,
+                        max(price) AS high,
+                        min(price) AS low,
+                        last(price, time) AS close,
+                        sum(volume) AS volume
+                      FROM sol_prices
+                      WHERE currency_code = 'SOL'
+                        AND time >= NOW() - INTERVAL '1 minute'
+                      GROUP BY interval
+                      ORDER BY interval DESC
+                      LIMIT 60;
+                    `;
                     const { rows } = yield pgClient.query(klineQuery);
                     console.log("Rows", rows);
                     if (rows.length > 0) {
