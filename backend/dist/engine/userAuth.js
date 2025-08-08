@@ -21,7 +21,7 @@ const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const postgres_prisma_1 = __importDefault(require("@repo/postgres-prisma"));
 const zodvalidator_1 = require("../zodvalidator");
 const dotenv_1 = __importDefault(require("dotenv"));
-const metrics_1 = require("../Monitoring/metrics");
+const metrics_1 = require("@repo/prometheus/metrics");
 dotenv_1.default.config();
 const SALT_ROUNDS = 10;
 function userSignUp(req, res) {

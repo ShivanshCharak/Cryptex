@@ -133,6 +133,7 @@ export class Engine {
       filled: 0,
       side,
       userId,
+      market
     };
 
     const { fills, executedQty } = await orderbook.addOrder(order);
@@ -145,6 +146,7 @@ export class Engine {
           fill.otherUserId,
           Number(fill.price),
           fill.quantity,
+          market,
           fill.side,
           fill?.filled
         );
@@ -165,6 +167,7 @@ export class Engine {
     sellerUserId: string,
     price: number,
     fillAmount: number,
+    market:string,
     side: "buy" | "sell",
     filled: number
   ) {
@@ -202,7 +205,7 @@ export class Engine {
             needed: string;
             available: string;
           };
-      this.syncArraysWithRedisResult(result, orderId, price, side);
+      this.syncArraysWithRedisResult(result, orderId, price,market, side);
 
       if ("err" in result) {
         // result is of type: { err: string; needed: string; available: string; }
@@ -230,9 +233,10 @@ export class Engine {
     result: any,
     orderId: string,
     price: number,
+    market:string,
     side: "buy" | "sell"
   ) {
-    const orderbook = this.orderbooks[0];
+    const orderbook = this.orderbooks.get(market.split("_")[0]);
     if (!orderbook) {
       logger.warn(`No orderbookfound while executing orderId ${orderId}`);
       return;
@@ -241,18 +245,18 @@ export class Engine {
     if (result.ok === "ORDER_COMPLETE") {
       if (side === "buy") {
         orderbook.bids = orderbook.bids.filter(
-          (order) => order.orderId !== orderId
+          (order:Order) => order.orderId !== orderId
         );
       } else {
         orderbook.asks = orderbook.asks.filter(
-          (order) => order.orderId !== orderId
+          (order:Order) => order.orderId !== orderId
         );
       }
     } else if (result.ok === "PARTIAL_FILL") {
       logger.info(`PARTIALLY FILLED ${orderId}`);
       const orderArray = side === "buy" ? orderbook.bids : orderbook.asks;
       const orderIndex = orderArray.findIndex(
-        (order) => order.orderId === orderId
+        (order:Order) => order.orderId === orderId
       );
 
       if (orderIndex !== -1) {
@@ -338,6 +342,7 @@ export class Engine {
           side: fill.side,
           userId: fill.otherUserId,
           filled: fill.filled,
+          market
         };
 
         if (updatedOrder.quantity > 0) {
@@ -444,38 +449,4 @@ async updateOrderBook() {
 
 
   async syncOrderbookToDB() {}
-  // setBaseBalances() {
-  //     this.balances.set("1", {
-  //         [BASE_CURRENCY]: {
-  //             available: 10000000,
-  //             locked: 0
-  //         },
-  //         "TATA": {
-  //             available: 10000000,
-  //             locked: 0
-  //         }
-  //     });
-
-  //     this.balances.set("2", {
-  //         [BASE_CURRENCY]: {
-  //             available: 10000000,
-  //             locked: 0
-  //         },
-  //         "TATA": {
-  //             available: 10000000,
-  //             locked: 0
-  //         }
-  //     });
-
-  //     this.balances.set("5", {
-  //         [BASE_CURRENCY]: {
-  //             available: 10000000,
-  //             locked: 0
-  //         },
-  //         "TATA": {
-  //             available: 10000000,
-  //             locked: 0
-  //         }
-  //     });
-  // }
 }

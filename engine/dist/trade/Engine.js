@@ -12,11 +12,11 @@ const fs_1 = __importDefault(require("fs"));
 const postgres_prisma_1 = __importDefault(require("@repo/postgres-prisma"));
 exports.redis = new RedisManager_1.RedisManager();
 class Engine {
-    orderbooks = [];
+    orderbooks = new Map();
     DepthMap = {};
     constructor() {
         let snapshot = null;
-        this.orderbooks = [new Orderbook_1.Orderbook("SOL", [], [], 0, 0)];
+        this.orderbooks = new Map();
     }
     async init() {
         if (process.env.WITH_SNAPSHOT) {
@@ -25,11 +25,10 @@ class Engine {
         else {
             await this.loadOrdersToRedis();
             await this.updateOrderBook();
-            await this.loadUserBalancesToRedis();
-            await this.loadCryptoToRedis();
+            await this.loadUserBalancesToRedis;
         }
     }
-    async process({ message, clientId }) {
+    async process({ message, clientId, }) {
         console.log(message, clientId);
         switch (message.type) {
             case "CREATE_ORDER": {
@@ -49,10 +48,12 @@ class Engine {
                     console.error("Create order error", error);
                 }
             }
-            case "GET_DEPTH":
+            case "GET_DEPTH": {
                 try {
                     const market = message.data.market;
-                    const orderbook = this.orderbooks.find((o) => o?.ticker() === market);
+                    console.log("market", market);
+                    const orderbook = this.orderbooks.get(market.split("_")[0]);
+                    console.log("gegtugn reuqest", market);
                     if (!orderbook) {
                         throw new Error("No orderbook found");
                     }
@@ -73,11 +74,12 @@ class Engine {
                     });
                 }
                 break;
+            }
         }
     }
     // Base asset:- TATA, Quote asset:- Inr
     async createOrder(market, price, quantity, side, userId) {
-        const orderbook = this.orderbooks.find((o) => o?.ticker() === market);
+        const orderbook = this.orderbooks.get(market.split("_")[0]);
         const baseAsset = market.split("_")[0];
         const quoteAsset = market.split("_")[1];
         if (!orderbook) {
@@ -92,25 +94,26 @@ class Engine {
             filled: 0,
             side,
             userId,
+            market
         };
         const { fills, executedQty } = await orderbook.addOrder(order);
         logger_1.logger.info(`Added order ${fills} and quantity ${executedQty}`);
         await Promise.all(fills.map((fill) => {
-            return this.InitiateRedisTrades(fill.orderId, userId, fill.otherUserId, Number(fill.price), fill.quantity, fill.side, fill?.filled);
+            return this.InitiateRedisTrades(fill.orderId, userId, fill.otherUserId, Number(fill.price), fill.quantity, market, fill.side, fill?.filled);
         }));
         this.publisWsDepthUpdates(fills, price, side, market);
         this.createDbTrades(fills, market, userId);
-        this.publishWsTrades(fills, userId, market);
+        // this.publishWsTrades(fills, userId, market);
         return { fills, executedQty };
     }
-    async InitiateRedisTrades(orderId, buyerUserId, sellerUserId, price, fillAmount, side, filled) {
+    async InitiateRedisTrades(orderId, buyerUserId, sellerUserId, price, fillAmount, market, side, filled) {
         try {
             // Input validation
             if (isNaN(price) || isNaN(fillAmount)) {
                 logger_1.logger.error(`Invalid price and amount for ${orderId} or ${buyerUserId} While sending it to redis`);
                 throw new Error("Invalid price or fill amount");
             }
-            const result = await exports.redis.evaluateTransaction(luaScript_1.OrderBuyScript, {
+            const result = (await exports.redis.evaluateTransaction(luaScript_1.OrderBuyScript, {
                 arguments: [
                     orderId,
                     buyerUserId,
@@ -120,17 +123,17 @@ class Engine {
                     side,
                     filled?.toString(),
                 ],
-            });
-            this.syncArraysWithRedisResult(result, orderId, price, side);
-            if ('err' in result) {
+            }));
+            this.syncArraysWithRedisResult(result, orderId, price, market, side);
+            if ("err" in result) {
                 // result is of type: { err: string; needed: string; available: string; }
                 logger_1.logger.error(`redis transaction failed for ${orderId} ${buyerUserId}`, result.err);
-                console.log('Error:', result.err);
+                console.log("Error:", result.err);
             }
             else {
                 logger_1.logger.info(`Redis transaction completed succesfully for ${orderId} ${buyerUserId}`);
                 // result is of type: { ok: string; buyerUserId: string; ... }
-                console.log('Success:', result.ok);
+                console.log("Success:", result.ok);
             }
             return result;
         }
@@ -140,8 +143,8 @@ class Engine {
             throw error;
         }
     }
-    async syncArraysWithRedisResult(result, orderId, price, side) {
-        const orderbook = this.orderbooks[0];
+    async syncArraysWithRedisResult(result, orderId, price, market, side) {
+        const orderbook = this.orderbooks.get(market.split("_")[0]);
         if (!orderbook) {
             logger_1.logger.warn(`No orderbookfound while executing orderId ${orderId}`);
             return;
@@ -168,6 +171,7 @@ class Engine {
     }
     createDbTrades(fills, market, userId) {
         logger_1.logger.info("Databse trades started");
+        console.log("DB TRADESS ");
         fills.forEach((fill) => {
             RedisManager_1.RedisManager.getInstance().pushMessage({
                 type: "TRADE_ADDED",
@@ -206,23 +210,8 @@ class Engine {
             });
         });
     }
-    publishWsTrades(fills, userId, market) {
-        fills.forEach((fill) => {
-            RedisManager_1.RedisManager.getInstance().publishMessage(`trade@${market}`, {
-                stream: `trade@${market}`,
-                data: {
-                    e: "trade",
-                    t: fill.tradeId,
-                    m: fill.otherUserId === userId,
-                    p: fill.price,
-                    q: fill.quantity.toString(),
-                    s: market,
-                },
-            });
-        });
-    }
     publisWsDepthUpdates(fills, price, side, market) {
-        const orderbook = this.orderbooks.find((o) => o?.ticker() === market);
+        const orderbook = this.orderbooks.get(market.split("_")[0]);
         if (!orderbook)
             return;
         const updatedAsk = [];
@@ -237,6 +226,7 @@ class Engine {
                     side: fill.side,
                     userId: fill.otherUserId,
                     filled: fill.filled,
+                    market
                 };
                 if (updatedOrder.quantity > 0) {
                     (orderType === "asks" ? updatedAsk : updatedBid).push(updatedOrder);
@@ -274,27 +264,6 @@ class Engine {
             console.error("Error occurred while saving balances to Redis", error);
         }
     }
-    async loadCryptoToRedis() {
-        const cryptos = await postgres_prisma_1.default.cryptoBalance.findMany();
-        if (!cryptos) {
-            console.log(`No account found for user crypt`);
-            return;
-        }
-        try {
-            const loaded = await Promise.all(cryptos.map((crypto) => {
-                exports.redis.setHash(`crypto:${crypto.userId}`, {
-                    [`${crypto.asset}_available`]: crypto?.quantity.toString(),
-                    [`${crypto.asset}_locked`]: "0",
-                    asset: crypto?.asset.toString(),
-                    userId: crypto?.userId.toString(),
-                    accountId: crypto?.accountId?.toString(),
-                });
-            }));
-        }
-        catch (error) {
-            console.log("Error occured while saving crypot balance", error);
-        }
-    }
     async loadOrdersToRedis() {
         const orders = await postgres_prisma_1.default.orders.findMany({});
         if (!orders) {
@@ -321,46 +290,35 @@ class Engine {
     }
     // Orderbook crafted just for SOL_USDC MARKET
     async updateOrderBook() {
-        for (let orderbook of this.orderbooks) {
-            if (orderbook?.baseAsset === "SOL") {
-                orderbook.bids = [];
-                orderbook.asks = [];
-            }
-        }
         try {
-            const keys = await exports.redis.scanKeysStream();
-            for (let key in keys) {
-                const data = await exports.redis.getAllHashFields(keys[key]);
-                if (data.market === "SOL") {
-                    for (let order of this.orderbooks) {
-                        if (order?.baseAsset === data.market) {
-                            if (data.side === "buy") {
-                                order.bids.push({
-                                    price: Number(data.price),
-                                    quantity: Number(data.quantity),
-                                    orderId: data.orderId,
-                                    filled: Number(data.filled),
-                                    side: data.side,
-                                    userId: data.userId,
-                                });
-                            }
-                            else {
-                                order.asks.push({
-                                    price: Number(data.price),
-                                    quantity: Number(data.quantity),
-                                    orderId: data.orderId,
-                                    filled: Number(data.filled),
-                                    side: data.side === "buy" ? "buy" : "sell",
-                                    userId: data.userId,
-                                });
-                            }
-                        }
-                    }
+            const keys = await exports.redis.scanKeysStream(); // Get all keys
+            for (let key of keys) {
+                const data = await exports.redis.getAllHashFields(key);
+                if (!data.market)
+                    continue;
+                if (!this.orderbooks.has(data.market)) {
+                    this.orderbooks.set(data.market, new Orderbook_1.Orderbook(data.market, [], [], 0, 0));
+                }
+                const orderbook = this.orderbooks.get(data.market);
+                const order = {
+                    price: Number(data.price),
+                    quantity: Number(data.quantity),
+                    orderId: data.orderId,
+                    filled: Number(data.filled),
+                    side: data.side,
+                    userId: data.userId,
+                    market: data.market
+                };
+                if (data.side === "buy") {
+                    orderbook.bids.push(order);
+                }
+                else {
+                    orderbook.asks.push(order);
                 }
             }
         }
-        catch (error) {
-            console.log(error);
+        catch (err) {
+            logger_1.logger.error("Error updating orderbooks:", err);
         }
     }
     async syncOrderbookToDB() { }

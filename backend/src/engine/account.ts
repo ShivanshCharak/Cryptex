@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import prisma, {Prisma} from "@repo/postgres-prisma";
 import jwt from 'jsonwebtoken';
-import { httpTotalRequest,errorTotal,httpSuccessfullRequest } from "../Monitoring/metrics";
+import { httpTotalRequest,errorTotal,httpSuccessfullRequest } from "@repo/prometheus/metrics";
 
 
 

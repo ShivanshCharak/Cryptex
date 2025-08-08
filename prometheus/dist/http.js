@@ -1,54 +1,50 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.register = exports.buisnessMetrics = exports.redisPendingOrderGauge = exports.totalMemoryGauge = exports.memoryUsedGauge = exports.httpConnections = exports.httpSuccessfullRequest = exports.errorTotal = exports.httpTotalRequest = exports.httpRequestDurationSeconds = exports.sharedRegistry = void 0;
-const prom_client_1 = require("prom-client");
-Object.defineProperty(exports, "register", { enumerable: true, get: function () { return prom_client_1.register; } });
-exports.sharedRegistry = new prom_client_1.Registry();
-(0, prom_client_1.collectDefaultMetrics)({ register: exports.sharedRegistry });
-exports.httpRequestDurationSeconds = new prom_client_1.Histogram({
+import { collectDefaultMetrics, register, Registry, Counter, Histogram, Gauge } from 'prom-client';
+export const sharedRegistry = new Registry();
+collectDefaultMetrics({ register: sharedRegistry });
+export const httpRequestDurationSeconds = new Histogram({
     name: "http_request_duration_seconds",
     help: "Duration og HTTP request in seconds",
     labelNames: ["method", "route", "status_code"],
     buckets: [0.1, 0.3, 0.5, 1, 2, 5],
-    registers: [exports.sharedRegistry]
+    registers: [sharedRegistry]
 });
-exports.httpTotalRequest = new prom_client_1.Counter({
+export const httpTotalRequest = new Counter({
     name: "http_requests_total",
     help: "Total number of http request",
     labelNames: ["method", "routes"],
-    registers: [exports.sharedRegistry]
+    registers: [sharedRegistry]
 });
-exports.errorTotal = new prom_client_1.Counter({
+export const errorTotal = new Counter({
     name: "http_error_total",
     help: "Total numbers of http errors",
     labelNames: ["error", 'status_code', "routes"],
-    registers: [exports.sharedRegistry]
+    registers: [sharedRegistry]
 });
-exports.httpSuccessfullRequest = new prom_client_1.Counter({
+export const httpSuccessfullRequest = new Counter({
     name: "http_successfull_requests_total",
     help: "Total number of http request",
     labelNames: ["method", "routes", "message"],
-    registers: [exports.sharedRegistry]
+    registers: [sharedRegistry]
 });
-exports.httpConnections = new prom_client_1.Gauge({
+export const httpConnections = new Gauge({
     name: "total_http_connections",
     help: "Number of http connections",
-    registers: [exports.sharedRegistry]
+    registers: [sharedRegistry]
 });
-exports.memoryUsedGauge = new prom_client_1.Gauge({
+export const memoryUsedGauge = new Gauge({
     name: "total_memory_used",
     help: "Memory used gauge",
-    registers: [exports.sharedRegistry]
+    registers: [sharedRegistry]
 });
-exports.totalMemoryGauge = new prom_client_1.Gauge({
+export const totalMemoryGauge = new Gauge({
     name: "total_memory",
     help: "Memory gauge",
-    registers: [exports.sharedRegistry]
+    registers: [sharedRegistry]
 });
-exports.redisPendingOrderGauge = new prom_client_1.Gauge({
+export const redisPendingOrderGauge = new Gauge({
     name: "redis_pending_orders",
     help: "Redis pending orders",
-    registers: [exports.sharedRegistry]
+    registers: [sharedRegistry]
 });
 // const temperatureGauge = new Gauge({
 //   name: 'temperature_celsius',
@@ -71,23 +67,25 @@ exports.redisPendingOrderGauge = new prom_client_1.Gauge({
 //     name:"postgres_connection_status",
 //     help:"return 1 for active 0 for dead"
 // })
-exports.buisnessMetrics = {
-    usersCreated: new prom_client_1.Counter({
+export const buisnessMetrics = {
+    usersCreated: new Counter({
         name: "users_created",
         help: "Total number of users created",
         labelNames: ['channel_type', 'server_id'],
-        registers: [exports.sharedRegistry]
+        registers: [sharedRegistry]
     }),
-    messageProcessed: new prom_client_1.Counter({
+    messageProcessed: new Counter({
         name: "message_processed",
         help: "total number of message processed",
         labelNames: ["channel_type", "server_id"],
-        registers: [exports.sharedRegistry]
+        registers: [sharedRegistry]
     }),
-    errorRate: new prom_client_1.Counter({
+    errorRate: new Counter({
         name: "application_error",
         help: "Application error",
         labelNames: ["error_name", "server_id"],
-        registers: [exports.sharedRegistry]
+        registers: [sharedRegistry]
     })
 };
+export { sharedRegistry as register };
+//# sourceMappingURL=http.js.map

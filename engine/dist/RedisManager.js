@@ -25,7 +25,7 @@ class RedisManager {
     }
     async publishMessage(channel, message) {
         {
-            console.log("channel", channel);
+            console.log("channel", channel, message);
         }
         await this.client.publish(channel, JSON.stringify(message));
     }

@@ -14,18 +14,22 @@ const pgClient = new pg_1.Client({
 pgClient.connect();
 exports.klineRouter = (0, express_1.Router)();
 exports.klineRouter.get("/", async (req, res) => {
+    console.log("HITTING");
     metrics_1.httpTotalRequest.inc({
         method: "get",
         routes: "api/v1/klines"
     });
-    const { startTime, endTime } = req.query;
+    const { startTime, endTime, symbol } = req.query;
+    console.log("starttime", startTime, endTime, req.query);
+    let market = symbol?.toString().split("_")[0]?.toLowerCase();
+    console.log(market);
     let query;
     switch ('1h') {
         // case '1m':
         //     query = `SELECT * FROM klines_1m WHERE bucket >= $1 AND bucket <= $2`;
         //     break;
         case '1h':
-            query = `SELECT * FROM klines_1h WHERE  bucket >= $1 AND bucket <= $2`;
+            query = `SELECT * FROM klines_${market}_1h WHERE  bucket >= $1 AND bucket <= $2`;
             break;
             // case '1w':
             //     query = `SELECT * FROM klines_1w WHERE bucket >= $1 AND bucket <= $2`;
@@ -33,9 +37,12 @@ exports.klineRouter.get("/", async (req, res) => {
             // default:
             return res.status(400).send('Invalid interval');
     }
+    console.log("resultdata", "fjv", query);
     try {
         //@ts-ignore
-        const result = await pgClient.query(query, [new Date(startTime * 1000), new Date(endTime * 1000)]);
+        console.log("result", startTime, endTime);
+        const result = await pgClient.query(query, [new Date(Number(endTime)), new Date(Number(startTime))]);
+        console.table(result.rows);
         res.json(result.rows.map(x => ({
             close: x.close,
             end: x.bucket,

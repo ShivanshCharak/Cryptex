@@ -15,7 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.depositMoney = depositMoney;
 const postgres_prisma_1 = __importDefault(require("@repo/postgres-prisma"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
-const metrics_1 = require("../Monitoring/metrics");
+const metrics_1 = require("@repo/prometheus/metrics");
 function depositMoney(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         console.log("deposit money");

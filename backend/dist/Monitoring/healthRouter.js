@@ -15,7 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.healthRouter = void 0;
 exports.decrementConnection = decrementConnection;
 exports.incrementConnection = incrementConnection;
-const metrics_1 = require("./metrics");
+const metrics_1 = require("@repo/prometheus/metrics");
 const express_1 = require("express");
 const postgres_prisma_1 = __importDefault(require("@repo/postgres-prisma"));
 const dotenv_1 = __importDefault(require("dotenv"));

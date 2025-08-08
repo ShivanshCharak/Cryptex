@@ -16,6 +16,7 @@ exports.metricsRouter = void 0;
 const metrics_1 = require("./metrics");
 const express_1 = require("express");
 const ioredis_1 = __importDefault(require("ioredis"));
+const shared_metrics_1 = require("./shared-metrics");
 let redisUrl = process.env.REDIS_URL;
 if (!redisUrl) {
     throw new Error("REDIS_URL environment variable is not set.");
@@ -39,6 +40,6 @@ function updateMetrics() {
 }
 exports.metricsRouter.get("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     yield updateMetrics();
-    res.set('Content-Type', metrics_1.register.contentType);
-    res.end(yield metrics_1.register.metrics());
+    res.set('Content-Type', shared_metrics_1.sharedRegistry.contentType);
+    res.end(yield shared_metrics_1.sharedRegistry.metrics());
 }));

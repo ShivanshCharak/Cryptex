@@ -21,9 +21,7 @@ class RedisManager {
     sendAndAwait(message) {
         return new Promise(async (resolve) => {
             const id = this.getRandomClientId();
-            console.log(id);
             this.client.subscribe(id, (message) => {
-                console.log(message);
                 this.client.unsubscribe(id);
                 resolve(JSON.parse(message));
             });

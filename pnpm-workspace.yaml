@@ -1,9 +1,23 @@
-"packages":
-  - "api"
-  - "backend"
-  - "postgres-prisma"
-  - "engine"
-  - "frontend"
-  - "db"
-  - "docker"
-  - "ws"
+packages:
+  - api
+  - backend
+  - postgres-prisma
+  - engine
+  - frontend
+  - db
+  - docker
+  - ws
+  - prometheus
+
+ignoredBuiltDependencies:
+  - '@prisma/client'
+  - '@prisma/engines'
+  - bcrypt
+  - bufferutil
+  - esbuild
+  - postgresql
+  - prisma
+  - protobufjs
+  - sharp
+  - unrs-resolver
+  - utf-8-validate

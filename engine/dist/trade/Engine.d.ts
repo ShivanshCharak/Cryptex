@@ -6,7 +6,7 @@ export declare class Engine {
     private DepthMap;
     constructor();
     init(): Promise<void>;
-    process({ message, clientId }: {
+    process({ message, clientId, }: {
         message: {
             type: string;
             data: {
@@ -23,7 +23,7 @@ export declare class Engine {
         fills: Fill[];
         executedQty: number;
     }>;
-    InitiateRedisTrades(orderId: string, buyerUserId: string, sellerUserId: string, price: number, fillAmount: number, side: "buy" | "sell", filled: number): Promise<{
+    InitiateRedisTrades(orderId: string, buyerUserId: string, sellerUserId: string, price: number, fillAmount: number, market: string, side: "buy" | "sell", filled: number): Promise<{
         ok: string;
         buyerUserId: string;
         sellerUserId: string;
@@ -36,13 +36,11 @@ export declare class Engine {
         needed: string;
         available: string;
     }>;
-    syncArraysWithRedisResult(result: any, orderId: string, price: number, side: "buy" | "sell"): Promise<void>;
+    syncArraysWithRedisResult(result: any, orderId: string, price: number, market: string, side: "buy" | "sell"): Promise<void>;
     createDbTrades(fills: Fill[], market: string, userId: string): void;
     updateDbOrders(order: Order, executedQty: number, fills: Fill[], market: string): void;
-    publishWsTrades(fills: Fill[], userId: string, market: string): void;
     publisWsDepthUpdates(fills: Fill[], price: number, side: "buy" | "sell", market: string): void;
     loadUserBalancesToRedis(): Promise<void>;
-    loadCryptoToRedis(): Promise<void>;
     loadOrdersToRedis(): Promise<void>;
     updateOrderBook(): Promise<void>;
     syncOrderbookToDB(): Promise<void>;

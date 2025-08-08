@@ -38,7 +38,7 @@ export declare class RedisManager {
     }): Promise<void>;
     getOrder(): Promise<{
         market: string;
-        side: string;
+        side: "buy" | "sell";
         price: number;
         quantity: number;
         filled: number;

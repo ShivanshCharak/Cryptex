@@ -1,4 +1,4 @@
-import { buisnessMetrics,  } from './metrics'
+import { buisnessMetrics,  } from '@repo/prometheus/metrics'
 import{ Router }from 'express'
 import { Request, Response, NextFunction } from 'express'
 import prisma from '@repo/postgres-prisma'

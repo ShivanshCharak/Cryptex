@@ -4,7 +4,7 @@ import jwt from "jsonwebtoken";
 import prisma, {Prisma} from "@repo/postgres-prisma";
 import { userLoginSchema, userSchema } from "../zodvalidator";
 import dotenv from 'dotenv'
-import { httpTotalRequest,errorTotal, httpSuccessfullRequest } from "../Monitoring/metrics";
+import { httpTotalRequest,errorTotal, httpSuccessfullRequest } from "@repo/prometheus/metrics";
 dotenv.config()
 
 const SALT_ROUNDS = 10;

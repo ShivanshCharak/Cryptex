@@ -1,6 +1,6 @@
 import { Client } from 'pg';
 import { Router } from "express";
-import { httpTotalRequest } from '@repo/backend/metrics';
+import { httpTotalRequest,httpSuccessfullRequest,httpRequestDurationSeconds } from '@repo/prometheus/metrics';
 
 
 const pgClient = new Client({
@@ -14,16 +14,35 @@ pgClient.connect();
 
 export const klineRouter:Router = Router();
 
+klineRouter.use((req, res, next) => {
+ const startTime = performance.now();
+ 
+   const route = req.baseUrl + (req.route?.path || req.path);
+   httpTotalRequest.inc({
+     method: req.method,
+     routes: route
+   });
+   res.on('finish', () => {
+     const duration = performance.now() - startTime;
+      httpSuccessfullRequest.inc({
+     method: req.method,
+     message:res.statusMessage||"sucessfull",
+     routes: route
+   });
+ 
+     httpRequestDurationSeconds.observe({ method: req.method, route, status_code: res.statusCode }, duration / 1000);
+ 
+     
+     console.log(` Route: ${route} | Status: ${res.statusCode} | Duration: ${duration}ms`);
+   });
+ 
+   next(); // This is crucial to let the request proceed to the route handler
+});
 klineRouter.get("/", async (req, res) => {
-    console.log("HITTING")
-      httpTotalRequest.inc({
-            method:"get",
-            routes:"api/v1/klines"
-        })
     const {  startTime, endTime,symbol } = req.query;
     console.log("starttime",startTime,endTime,req.query)
     let market = symbol?.toString().split("_")[0]?.toLowerCase()
-    console.log(market)
+
     let query;
     switch ('1h') {
         // case '1m':
@@ -39,10 +58,9 @@ klineRouter.get("/", async (req, res) => {
             return res.status(400).send('Invalid interval');
     }
 
-    console.log("resultdata", "fjv",query)
     try {
         //@ts-ignore
-        console.log("result",startTime,endTime)
+      
         const result = await pgClient.query(query, [new Date(Number(endTime)), new Date(Number(startTime))]);
         console.table(result.rows)
         res.json(result.rows.map(x => ({
