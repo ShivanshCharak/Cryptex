@@ -194,6 +194,9 @@ importers:
       '@repo/postgres-prisma':
         specifier: workspace:*
         version: link:../postgres-prisma
+      '@repo/prometheus':
+        specifier: workspace:*
+        version: link:../prometheus
       '@types/express':
         specifier: ^4.17.21
         version: 4.17.23

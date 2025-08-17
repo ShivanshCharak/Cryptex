@@ -4,7 +4,6 @@ import { orderRouter } from "./routes/order";
 import { depthRouter } from "./routes/depth";
 import { klineRouter } from "./routes/kline";
 import { metricsRouter } from "./routes/metricsRoute";
-import { sharedRegistry } from "@repo/prometheus/metrics";
 
 export const app:Express = express();
 app.use(cors({
@@ -20,11 +19,6 @@ app.use("/api/v1/depth", depthRouter);
 app.use("/api/v1/klines", klineRouter);
 
 app.get("/metrics", metricsRouter);
-app.get("/metrics", async (_,res) => {
-
-    res.set('Content-Type', sharedRegistry.contentType);
-    res.end(await sharedRegistry.metrics());
-});
 
 
 app.listen(3000, () => {

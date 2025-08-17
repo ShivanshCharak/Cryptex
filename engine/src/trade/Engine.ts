@@ -157,7 +157,7 @@ export class Engine {
 
     this.createDbTrades(fills, market, userId);
 
-    // this.publishWsTrades(fills, userId, market);
+
     return { fills, executedQty };
   }
 
@@ -208,7 +208,7 @@ export class Engine {
       this.syncArraysWithRedisResult(result, orderId, price,market, side);
 
       if ("err" in result) {
-        // result is of type: { err: string; needed: string; available: string; }
+
         logger.error(
           `redis transaction failed for ${orderId} ${buyerUserId}`,
           result.err

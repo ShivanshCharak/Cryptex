@@ -4,10 +4,10 @@ import { httpTotalRequest,httpSuccessfullRequest,httpRequestDurationSeconds } fr
 
 
 const pgClient = new Client({
-    user: 'shivansh',
+    user: 'user',
     host: 'localhost',
     database: 'crypto',
-    password: 'shamsher@54',
+    password: 'database',
     port: 5432,
 });
 pgClient.connect();

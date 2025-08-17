@@ -31,3 +31,4 @@
 {"level":"error","message":"Error during create order TypeError: this.orderbooks.find is not a function","timestamp":"2025-08-06T15:07:36.690Z"}
 {"level":"error","message":"Error during create order TypeError: this.orderbooks.find is not a function","timestamp":"2025-08-06T15:07:58.816Z"}
 {"level":"error","message":"Error during create order TypeError: this.orderbooks.find is not a function","timestamp":"2025-08-06T15:08:07.891Z"}
+{"level":"error","message":"Error during create order TypeError: Cannot read properties of undefined (reading 'split')","timestamp":"2025-08-17T10:47:06.518Z"}

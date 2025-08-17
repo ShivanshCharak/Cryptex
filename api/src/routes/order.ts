@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { RedisManager } from "../RedisManager";
 import { CREATE_ORDER, CANCEL_ORDER, GET_OPEN_ORDERS } from "../types";
-import {httpSuccessfullRequest, httpRequestDurationSeconds,httpTotalRequest} from '@repo/backend/metrics'
+import {httpSuccessfullRequest, httpRequestDurationSeconds,httpTotalRequest} from '@repo/prometheus/metrics'
 
 
 

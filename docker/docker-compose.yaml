@@ -8,8 +8,8 @@ services:
       - "5432:5432"
     environment:
       POSTGRES_DB: crypto
-      POSTGRES_USER: shivansh
-      POSTGRES_PASSWORD: shamsher@54
+      POSTGRES_USER: username
+      POSTGRES_PASSWORD: password
     volumes:
       - timescale-data:/var/lib/postgresql/data
 
@@ -22,8 +22,8 @@ services:
       - "5433:5432"
     environment:
       POSTGRES_DB: users
-      POSTGRES_USER: shivansh
-      POSTGRES_PASSWORD: shamsher@54
+      POSTGRES_USER: username
+      POSTGRES_PASSWORD: password
     volumes:
       - postgres-data:/var/lib/postgresql/data
 
